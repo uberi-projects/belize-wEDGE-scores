@@ -1,4 +1,4 @@
-# calculate_GE2.r
+# read_EDGE.r
 
 ## Source code ------------------------
 source("load_packages.r")
