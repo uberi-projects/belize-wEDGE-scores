@@ -4,10 +4,15 @@
 source("load_packages.r")
 
 ## Use IUCN API to get Belize redlist (needs to be set in .Renviron) ------------------------
-belize_redlist <- rl_countries("BZ", key = Sys.getenv("IUCN_REDLIST_KEY"), latest = TRUE)
-belize_redlist_noDD <- belize_redlist$assessments %>%
-    filter(red_list_category_code != "DD") %>%
-    select(taxon_scientific_name, red_list_category_code, year_published)
+if (file.exists("outputs/belize_redlist_noDD.rds")) {
+    belize_redlist_noDD <- readRDS("outputs/belize_redlist_noDD.rds")
+} else {
+    belize_redlist <- rl_countries("BZ", key = Sys.getenv("IUCN_REDLIST_KEY"), latest = TRUE)
+    belize_redlist_noDD <- belize_redlist$assessments %>%
+        filter(red_list_category_code != "DD") %>%
+        select(taxon_scientific_name, red_list_category_code, year_published)
+    saveRDS(belize_redlist_noDD, "outputs/belize_redlist_noDD.rds")
+}
 
 ## Add in missing clades in batches ------------------------
 batch_indices <- split(
@@ -17,30 +22,43 @@ batch_indices <- split(
 taxonomy_batches <- vector("list", length(batch_indices))
 for (i in seq_along(batch_indices)) {
     taxa <- belize_redlist_noDD$taxon_scientific_name[batch_indices[[i]]]
-    taxonomy <- classification(
-        taxa,
-        db = "gbif",
-        ask = FALSE,
-        rank = "species"
-    )
+    taxonomy <- classification(taxa, db = "gbif", ask = FALSE, rank = "species")
     taxonomy <- taxonomy[!sapply(taxonomy, is.logical)]
-    tax_df <- imap_dfr(
-        taxonomy,
-        ~ mutate(.x, original_species = .y)
-    ) %>%
-        select(name, rank, original_species) %>%
+    tax_df <- imap_dfr(taxonomy, function(.x, .y) {
+        species_id <- if ("species" %in% .x$rank) .x$id[.x$rank == "species"] else NA
+        .x %>%
+            mutate(original_species = .y, gbif_id = species_id)
+    }) %>%
+        select(name, rank, original_species, gbif_id) %>%
         pivot_wider(
             names_from = rank,
             values_from = name,
             values_fn = ~ .x[1]
         )
-    saveRDS(
-        tax_df,
-        file = paste0("outputs/taxonomy_batch_", i, ".rds")
-    )
+    saveRDS(tax_df, paste0("outputs/taxonomy_batch_", i, ".rds"))
     taxonomy_batches[[i]] <- tax_df
 }
 
 ## Combine outputs from batches ------------------------
 files <- list.files("outputs", full.names = TRUE)
 belize_redlist_taxa <- bind_rows(lapply(files, readRDS))
+
+## Filter to only desired taxa ------------------------
+belize_redlist_mammals <- filter(belize_redlist_taxa, class == "Mammalia")
+belize_redlist_birds <- filter(belize_redlist_taxa, class == "Aves")
+belize_redlist_reptiles <- filter(belize_redlist_taxa, class == "Squamata")
+belize_redlist_amphibians <- filter(belize_redlist_taxa, class == "Amphibia")
+belize_redlist_fish <- belize_redlist_taxa %>%
+    filter(order %in% c(
+        "Acipenseriformes", "Albuliformes", "Alepocephaliformes", "Amiiformes", "Anabantiformes",
+        "Ateleopodiformes", "Argentiniformes", "Batrachoidiformes", "Beloniformes", "Beryciformes", "Blenniiformes",
+        "Caproiformes", "Carangiformes", "Carcharhiniformes", "Centrarchiformes", "Ceratodontiformes", "Chimaeriformes",
+        "Chimaeriformes", "Clupeiformes", "Cichliformes", "Coelacanthiformes", "Cypriniformes", "Cyprinodontiformes", "Elopiformes",
+        "Esociformes", "Gadiformes", "Galaxiiformes", "Gerreiformes", "Gasterosteiformes", "Gobiesociformes", "Gobiiformes",
+        "Gonorynchiformes", "Gymnotiformes", "Heterodontiformes", "Hexanchiformes", "Holocentriformes", "Hiodontiformes",
+        "Istiophoriformes", "Kurtiformes", "Lampriformes", "Lamniformes", "Lepisosteiformes", "Lophiiformes", "Mugiliformes",
+        "Myliobatiformes", "Myxiniformes", "Notacanthiformes", "Ophidiiformes", "Orectolobiformes", "Osmeriformes", "Percopsiformes",
+        "Perciformes", "Pleuronectiformes", "Polypteriformes", "Polymixiiformes", "Pristiophoriformes", "Rajiformes", "Rhinopristiformes",
+        "Salmoniformes", "Scorpaeniformes", "Scombriformes", "Siluriformes", "Squatiniformes", "Stomiatiformes", "Stylephoriformes",
+        "Syngnathiformes", "Synbranchiformes", "Tetraodontiformes", "Torpediniformes", "Zeiformes"
+    ))
