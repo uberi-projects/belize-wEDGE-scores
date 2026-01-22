@@ -55,21 +55,25 @@ files <- list.files("outputs", full.names = TRUE)
 belize_redlist_taxa <- bind_rows(lapply(files, readRDS))
 
 ## Filter to only desired taxa ------------------------
-belize_redlist_mammals <- filter(belize_redlist_taxa, class == "Mammalia")
-belize_redlist_birds <- filter(belize_redlist_taxa, class == "Aves")
-belize_redlist_reptiles <- filter(belize_redlist_taxa, class == "Squamata")
-belize_redlist_amphibians <- filter(belize_redlist_taxa, class == "Amphibia")
+belize_redlist_mammals <- filter(belize_redlist_taxa, class == "Mammalia", !is.na(gbif_id))
+belize_redlist_birds <- filter(belize_redlist_taxa, class == "Aves", !is.na(gbif_id))
+belize_redlist_reptiles <- filter(belize_redlist_taxa, class == "Squamata", !is.na(gbif_id))
+belize_redlist_turtles <- filter(belize_redlist_taxa, class == "Testudines", !is.na(gbif_id))
+belize_redlist_amphibians <- filter(belize_redlist_taxa, class == "Amphibia", !is.na(gbif_id))
 belize_redlist_fish <- belize_redlist_taxa %>%
-    filter(order %in% c(
-        "Acipenseriformes", "Albuliformes", "Alepocephaliformes", "Amiiformes", "Anabantiformes",
-        "Ateleopodiformes", "Argentiniformes", "Batrachoidiformes", "Beloniformes", "Beryciformes", "Blenniiformes",
-        "Caproiformes", "Carangiformes", "Carcharhiniformes", "Centrarchiformes", "Ceratodontiformes", "Chimaeriformes",
-        "Chimaeriformes", "Clupeiformes", "Cichliformes", "Coelacanthiformes", "Cypriniformes", "Cyprinodontiformes", "Elopiformes",
-        "Esociformes", "Gadiformes", "Galaxiiformes", "Gerreiformes", "Gasterosteiformes", "Gobiesociformes", "Gobiiformes",
-        "Gonorynchiformes", "Gymnotiformes", "Heterodontiformes", "Hexanchiformes", "Holocentriformes", "Hiodontiformes",
-        "Istiophoriformes", "Kurtiformes", "Lampriformes", "Lamniformes", "Lepisosteiformes", "Lophiiformes", "Mugiliformes",
-        "Myliobatiformes", "Myxiniformes", "Notacanthiformes", "Ophidiiformes", "Orectolobiformes", "Osmeriformes", "Percopsiformes",
-        "Perciformes", "Pleuronectiformes", "Polypteriformes", "Polymixiiformes", "Pristiophoriformes", "Rajiformes", "Rhinopristiformes",
-        "Salmoniformes", "Scorpaeniformes", "Scombriformes", "Siluriformes", "Squatiniformes", "Stomiatiformes", "Stylephoriformes",
-        "Syngnathiformes", "Synbranchiformes", "Tetraodontiformes", "Torpediniformes", "Zeiformes"
-    ))
+    filter(
+        !is.na(gbif_id),
+        order %in% c(
+            "Acipenseriformes", "Albuliformes", "Alepocephaliformes", "Amiiformes", "Anabantiformes",
+            "Ateleopodiformes", "Argentiniformes", "Batrachoidiformes", "Beloniformes", "Beryciformes", "Blenniiformes",
+            "Caproiformes", "Carangiformes", "Carcharhiniformes", "Centrarchiformes", "Ceratodontiformes", "Chimaeriformes",
+            "Chimaeriformes", "Clupeiformes", "Cichliformes", "Coelacanthiformes", "Cypriniformes", "Cyprinodontiformes", "Elopiformes",
+            "Esociformes", "Gadiformes", "Galaxiiformes", "Gerreiformes", "Gasterosteiformes", "Gobiesociformes", "Gobiiformes",
+            "Gonorynchiformes", "Gymnotiformes", "Heterodontiformes", "Hexanchiformes", "Holocentriformes", "Hiodontiformes",
+            "Istiophoriformes", "Kurtiformes", "Lampriformes", "Lamniformes", "Lepisosteiformes", "Lophiiformes", "Mugiliformes",
+            "Myliobatiformes", "Myxiniformes", "Notacanthiformes", "Ophidiiformes", "Orectolobiformes", "Osmeriformes", "Percopsiformes",
+            "Perciformes", "Pleuronectiformes", "Polypteriformes", "Polymixiiformes", "Pristiophoriformes", "Rajiformes", "Rhinopristiformes",
+            "Salmoniformes", "Scorpaeniformes", "Scombriformes", "Siluriformes", "Squatiniformes", "Stomiatiformes", "Stylephoriformes",
+            "Syngnathiformes", "Synbranchiformes", "Tetraodontiformes", "Torpediniformes", "Zeiformes"
+        )
+    )
