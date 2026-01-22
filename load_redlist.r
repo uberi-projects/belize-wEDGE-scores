@@ -19,24 +19,34 @@ batch_indices <- split(
     seq_along(belize_redlist_noDD$taxon_scientific_name),
     cut(seq_along(belize_redlist_noDD$taxon_scientific_name), 25, labels = FALSE)
 )
-taxonomy_batches <- vector("list", length(batch_indices))
 for (i in seq_along(batch_indices)) {
-    taxa <- belize_redlist_noDD$taxon_scientific_name[batch_indices[[i]]]
-    taxonomy <- classification(taxa, db = "gbif", ask = FALSE, rank = "species")
-    taxonomy <- taxonomy[!sapply(taxonomy, is.logical)]
-    tax_df <- imap_dfr(taxonomy, function(.x, .y) {
-        species_id <- if ("species" %in% .x$rank) .x$id[.x$rank == "species"] else NA
-        .x %>%
-            mutate(original_species = .y, gbif_id = species_id)
-    }) %>%
-        select(name, rank, original_species, gbif_id) %>%
-        pivot_wider(
-            names_from = rank,
-            values_from = name,
-            values_fn = ~ .x[1]
-        )
-    saveRDS(tax_df, paste0("outputs/taxonomy_batch_", i, ".rds"))
-    taxonomy_batches[[i]] <- tax_df
+    batch_file <- paste0("outputs/taxonomy_batch_", i, ".rds")
+    if (file.exists(batch_file)) {
+        message("Skipping batch ", i, " (found in outputs)")
+    } else {
+        taxa <- belize_redlist_noDD$taxon_scientific_name[batch_indices[[i]]]
+        taxonomy <- classification(taxa, db = "gbif", ask = FALSE, rank = "species")
+        taxonomy <- taxonomy[!sapply(taxonomy, is.logical)]
+        tax_df <- imap_dfr(taxonomy, function(.x, .y) {
+            species_id <- if ("species" %in% .x$rank) {
+                .x$id[.x$rank == "species"]
+            } else {
+                NA
+            }
+            .x %>%
+                mutate(
+                    original_species = .y,
+                    gbif_id = species_id
+                )
+        }) %>%
+            select(name, rank, original_species, gbif_id) %>%
+            pivot_wider(
+                names_from = rank,
+                values_from = name,
+                values_fn = ~ .x[1]
+            )
+        saveRDS(tax_df, batch_file)
+    }
 }
 
 ## Combine outputs from batches ------------------------
