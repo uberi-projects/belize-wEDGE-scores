@@ -18,3 +18,8 @@ species_EDGE <- data.frame(
     EDGE_CI_upper = apply(EDGE_matrix, 1, function(x) quantile(x, 0.975))
 )
 print(species_EDGE)
+
+## Create mammal phylogenetic tree ------------------------
+matches <- tnrs_match_names(belize_redlist_mammals$species)
+ott_ids <- matches$ott_id[!is.na(matches$ott_id) & !matches$approximate_match]
+mammal_tree <- tol_induced_subtree(ott_ids = ott_ids)

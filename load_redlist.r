@@ -48,7 +48,7 @@ for (i in seq_along(batch_indices)) {
 }
 
 ## Combine outputs from batches ------------------------
-files <- list.files("outputs", full.names = TRUE)
+files <- list.files("outputs", pattern = "^taxonomy_", full.names = TRUE)
 belize_redlist_taxa <- lapply(files, function(f) {
     readRDS(f) %>% mutate(across(everything(), as.character))
 }) %>%
