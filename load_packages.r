@@ -2,7 +2,7 @@
 
 ## Check required packages ------------------------
 options(repos = c(CRAN = "https://cran.rstudio.com/"))
-required_packages <- c("tidyverse", "rgbif", "maps", "rredlist", "taxize", "rfishbase")
+required_packages <- c("tidyverse", "rgbif", "maps", "rredlist", "taxize", "rfishbase", "readxl")
 install_if_missing <- function(package) {
     if (!requireNamespace(package, quietly = TRUE)) {
         install.packages(package)
@@ -17,3 +17,4 @@ library(maps)
 library(rredlist)
 library(taxize)
 library(rfishbase)
+library(readxl)
