@@ -2,6 +2,7 @@
 taxonomy_batch*
 belize_redlist_noDD*
 weights_belize_*
+fb_*
 
 # History files
 .Rhistory
