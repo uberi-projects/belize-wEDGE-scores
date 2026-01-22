@@ -6,6 +6,7 @@ source("load_packages.r")
 ## Use IUCN API to get Belize redlist (needs to be set in .Renviron) ------------------------
 if (file.exists("outputs/belize_redlist_noDD.rds")) {
     belize_redlist_noDD <- readRDS("outputs/belize_redlist_noDD.rds")
+    message("Read existing redlist file (found in outputs)")
 } else {
     belize_redlist <- rl_countries("BZ", key = Sys.getenv("IUCN_REDLIST_KEY"), latest = TRUE)
     belize_redlist_noDD <- belize_redlist$assessments %>%
