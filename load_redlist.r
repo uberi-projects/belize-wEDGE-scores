@@ -66,38 +66,45 @@ if (file.exists("outputs/fb_countries.rds")) {
     fb_countries <- readRDS("outputs/fb_countries.rds")
     message("Read existing fb countries file (found in outputs)")
 } else {
+    fb_countries <- fb_tbl("countries")
     saveRDS(fb_countries, "outputs/fb_countries.rds")
 }
 if (file.exists("outputs/fb_species.rds")) {
     fb_species <- readRDS("outputs/fb_species.rds")
     message("Read existing fb species file (found in outputs)")
 } else {
+    fb_species <- fb_tbl("species")
     saveRDS(fb_species, "outputs/fb_species.rds")
 }
 if (file.exists("outputs/fb_families.rds")) {
     fb_families <- readRDS("outputs/fb_families.rds")
     message("Read existing fb families file (found in outputs)")
 } else {
+    fb_families <- fb_tbl("families")
     saveRDS(fb_families, "outputs/fb_families.rds")
 }
-fb_belize_species <- fb_countries %>%
-    filter(C_Code == "084") %>%
-    left_join(fb_species, by = "SpecCode") %>%
-    mutate(taxon_scientific_name = paste(Genus, Species)) %>%
-    left_join(fb_families, by = "FamCode") %>%
-    select(SpecCode, Freshwater = Freshwater.x, Brackish = Brackish.x, Saltwater = Saltwater.x, Land, taxon_scientific_name, Family) %>%
-    mutate(Habitats = Freshwater + Brackish + Saltwater) %>%
-    rowwise() %>%
-    mutate(
-        gbif_match = list(name_backbone(name = taxon_scientific_name))
-    ) %>%
-    unnest_wider(gbif_match)
-
+if (file.exists("outputs/fb_belize_species.rds")) {
+    fb_belize_species <- readRDS("outputs/fb_belize_species.rds")
+    message("Read existing fb families file (found in outputs)")
+} else {
+    fb_belize_species <- fb_countries %>%
+        filter(C_Code == "084") %>%
+        left_join(fb_species, by = "SpecCode") %>%
+        mutate(taxon_scientific_name = paste(Genus, Species)) %>%
+        left_join(fb_families, by = "FamCode") %>%
+        select(SpecCode, Freshwater = Freshwater.x, Brackish = Brackish.x, Saltwater = Saltwater.x, Land, taxon_scientific_name, Family) %>%
+        mutate(Habitats = Freshwater + Brackish + Saltwater) %>%
+        rowwise() %>%
+        mutate(
+            gbif_match = list(name_backbone(name = taxon_scientific_name))
+        ) %>%
+        unnest_wider(gbif_match)
+    saveRDS(fb_belize_species, "outputs/fb_belize_species.rds")
+}
 belize_redlist_taxa_fishbase <- fb_belize_species %>%
     mutate(gbif_id = speciesKey) %>%
     left_join(belize_redlist_taxa, by = "gbif_id") %>%
     filter(!is.na(Habitats))
-
 belize_redlist_fish_freshwater <- filter(belize_redlist_taxa_fishbase, Freshwater.x == "1" & Habitats == 1, !is.na(gbif_id))
 belize_redlist_fish_marine <- filter(belize_redlist_taxa_fishbase, Saltwater.x == "1" & Habitats == 1, !is.na(gbif_id))
 belize_redlist_fish_brackish <- filter(belize_redlist_taxa_fishbase, Brackish.x == "1" & Habitats == 1, !is.na(gbif_id))
