@@ -18,6 +18,15 @@ calculate_weights_belize <- function(id_vector, name_vector) {
         arrange(-weight)
 }
 
+## Calculate proportion of occurrences in Belize for birds using GBIF occurrence data ------------------------
+if (file.exists("outputs/weights_belize_birds.rds")) {
+    weights_belize_birds <- readRDS("outputs/weights_belize_birds.rds")
+    message("Read existing birds weights file (found in outputs)")
+} else {
+    weights_belize_birds <- calculate_weights_belize(belize_redlist_birds$gbif_id, belize_redlist_birds$species)
+    saveRDS(weights_belize_birds, "outputs/weights_belize_birds.rds")
+}
+
 ## Calculate proportion of occurrences in Belize for amphibians using GBIF occurrence data ------------------------
 if (file.exists("outputs/weights_belize_amphibians.rds")) {
     weights_belize_amphibians <- readRDS("outputs/weights_belize_amphibians.rds")

@@ -1,5 +1,11 @@
 # calculate_wEDGE.r
 
+## Assemble wEDGE for birds ------------------------
+wEDGE_birds <- weights_belize_birds %>%
+    left_join(df_EDGE_all, by = "species") %>%
+    filter(!is.na(EDGE)) %>%
+    mutate(wEDGE = EDGE * weight, Type = "Bird", gbif_id = as.numeric(gbif_id))
+
 ## Assemble wEDGE for amphibians ------------------------
 wEDGE_amphibians <- weights_belize_amphibians %>%
     left_join(df_EDGE_all, by = "species") %>%
@@ -50,7 +56,7 @@ wEDGE_fish_mixed <- weights_belize_fish_mixed %>%
 
 ## Compile and export results ------------------------
 wEDGE_all <- bind_rows(
-    wEDGE_amphibians, wEDGE_mammals, wEDGE_reptiles, wEDGE_turtles,
+    wEDGE_birds, wEDGE_amphibians, wEDGE_mammals, wEDGE_reptiles, wEDGE_turtles,
     wEDGE_fish_freshwater, wEDGE_fish_marine, wEDGE_fish_brackish, wEDGE_fish_mixed
 ) %>%
     arrange(Type, -wEDGE)
