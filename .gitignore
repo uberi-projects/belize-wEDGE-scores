@@ -1,8 +1,6 @@
 # Outputs
-taxonomy_batch*
-belize_redlist_noDD*
-weights_belize_*
-fb_*
+/outputs/*
+!/outputs/.gitkeep
 
 # Data deposit files
 /data_deposit/*

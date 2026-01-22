@@ -27,4 +27,5 @@ df_EDGE_all_exceptbirds <- bind_rows(
 ) %>%
     rename(EDGE = EDGE.median) %>%
     select(Species, Common.names, EDGE)
-df_EDGE_all <- bind_rows(df_EDGE_all_exceptbirds, df_EDGE_birds)
+df_EDGE_all <- bind_rows(df_EDGE_all_exceptbirds, df_EDGE_birds) %>%
+    rename(species = Species)
