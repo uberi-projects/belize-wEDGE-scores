@@ -4,6 +4,10 @@ belize_redlist_noDD*
 weights_belize_*
 fb_*
 
+# Data deposit files
+/data_deposit/*
+!/data_deposit/.gitkeep
+
 # History files
 .Rhistory
 .Rapp.history
