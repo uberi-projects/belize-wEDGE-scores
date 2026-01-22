@@ -1,8 +1,5 @@
 # calculate_w.r
 
-## Source code ------------------------
-source("load_packages.r")
-
 ## Read belize basemap ------------------------
 belize_map <- st_read("shapefiles/Belize_Basemap.shp") %>%
     st_transform(4326) %>%
