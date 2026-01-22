@@ -12,9 +12,8 @@ if (file.exists("outputs/pext_samples_EDGE2.rds")) {
     saveRDS(pext.samples, "outputs/pext_samples_EDGE2.rds")
 }
 
-## Get GE (pext mean) from IUCN categories ------------------------
-GE_CR <- median(pext.samples$pext[pext.samples$RL.cat == "CR"])
-GE_EN <- median(pext.samples$pext[pext.samples$RL.cat == "EN"])
-GE_VU <- median(pext.samples$pext[pext.samples$RL.cat == "VU"])
-GE_NT <- median(pext.samples$pext[pext.samples$RL.cat == "NT"])
-GE_LC <- median(pext.samples$pext[pext.samples$RL.cat == "LC"])
+## Get GE sample from IUCN categories ------------------------
+sample_GE <- function(RL_cat, pext_samples = pext.samples) {
+    cat_pext <- pext.samples$pext[pext.samples$RL.cat == RL_cat]
+    sample(cat_pext, 1)
+}
