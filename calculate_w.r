@@ -1,10 +1,5 @@
 # calculate_w.r
 
-## Read belize basemap ------------------------
-belize_map <- st_read("shapefiles/Belize_Basemap.shp") %>%
-    st_transform(4326) %>%
-    st_make_valid()
-
 ## Define function to calculate weights for Belize from GBIF occurrence data ------------------------
 calculate_weights_belize <- function(id_vector, name_vector) {
     out <- list()
