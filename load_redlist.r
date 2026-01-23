@@ -55,7 +55,7 @@ belize_redlist_taxa <- lapply(files, function(f) {
     bind_rows() %>%
     distinct(gbif_id, .keep_all = TRUE) %>%
     left_join(belize_redlist_noDD, by = c("original_species" = "taxon_scientific_name"))
-View(belize_redlist_noDD)
+
 ## Filter to only desired taxa (except fish) ------------------------
 belize_redlist_mammals <- filter(belize_redlist_taxa, class == "Mammalia", !is.na(gbif_id))
 belize_redlist_birds <- filter(belize_redlist_taxa, class == "Aves", !is.na(gbif_id))
@@ -105,10 +105,12 @@ if (file.exists("outputs/fb_belize_species.rds")) {
     saveRDS(fb_belize_species, "outputs/fb_belize_species.rds")
 }
 belize_redlist_taxa_fishbase <- fb_belize_species %>%
+    distinct(taxon_scientific_name, species, .keep_all = TRUE) %>%
     mutate(gbif_id = speciesKey) %>%
-    left_join(select(belize_redlist_taxa, gbif_id, species), by = "gbif_id") %>%
+    left_join(distinct(belize_redlist_taxa, gbif_id, .keep_all = TRUE) %>% select(gbif_id, species), by = "gbif_id") %>%
     filter(!is.na(Habitats)) %>%
-    mutate(species = species.y)
+    mutate(species = species.y) %>%
+    left_join(belize_redlist_noDD, by = "taxon_scientific_name")
 belize_redlist_fish_freshwater <- filter(belize_redlist_taxa_fishbase, Freshwater == "1" & Habitats == 1, !is.na(gbif_id))
 belize_redlist_fish_marine <- filter(belize_redlist_taxa_fishbase, Saltwater == "1" & Habitats == 1, !is.na(gbif_id))
 belize_redlist_fish_brackish <- filter(belize_redlist_taxa_fishbase, Brackish == "1" & Habitats == 1, !is.na(gbif_id))
