@@ -53,8 +53,9 @@ belize_redlist_taxa <- lapply(files, function(f) {
     readRDS(f) %>% mutate(across(everything(), as.character))
 }) %>%
     bind_rows() %>%
-    distinct(gbif_id, .keep_all = TRUE)
-
+    distinct(gbif_id, .keep_all = TRUE) %>%
+    left_join(belize_redlist_noDD, by = c("original_species" = "taxon_scientific_name"))
+View(belize_redlist_noDD)
 ## Filter to only desired taxa (except fish) ------------------------
 belize_redlist_mammals <- filter(belize_redlist_taxa, class == "Mammalia", !is.na(gbif_id))
 belize_redlist_birds <- filter(belize_redlist_taxa, class == "Aves", !is.na(gbif_id))
