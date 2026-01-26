@@ -18,87 +18,93 @@ calculate_weights_belize <- function(id_vector, name_vector) {
         arrange(-weight)
 }
 
+## Create directory for output weights ------------------------
+directory_weights <- "outputs/weights"
+if (!dir.exists(directory_weights)) {
+    dir.create(directory_weights, recursive = TRUE)
+}
+
 ## Calculate proportion of occurrences in Belize for birds using GBIF occurrence data ------------------------
-if (file.exists("outputs/weights_belize_birds.rds")) {
-    weights_belize_birds <- readRDS("outputs/weights_belize_birds.rds")
+if (file.exists("outputs/weights/weights_belize_birds.rds")) {
+    weights_belize_birds <- readRDS("outputs/weights/weights_belize_birds.rds")
     message("Read existing birds weights file (found in outputs)")
 } else {
     weights_belize_birds <- calculate_weights_belize(belize_redlist_birds$gbif_id, belize_redlist_birds$species)
-    saveRDS(weights_belize_birds, "outputs/weights_belize_birds.rds")
+    saveRDS(weights_belize_birds, "outputs/weights/weights_belize_birds.rds")
 }
 
 ## Calculate proportion of occurrences in Belize for amphibians using GBIF occurrence data ------------------------
-if (file.exists("outputs/weights_belize_amphibians.rds")) {
-    weights_belize_amphibians <- readRDS("outputs/weights_belize_amphibians.rds")
+if (file.exists("outputs/weights/weights_belize_amphibians.rds")) {
+    weights_belize_amphibians <- readRDS("outputs/weights/weights_belize_amphibians.rds")
     message("Read existing amphibians weights file (found in outputs)")
 } else {
     weights_belize_amphibians <- calculate_weights_belize(belize_redlist_amphibians$gbif_id, belize_redlist_amphibians$species)
-    saveRDS(weights_belize_amphibians, "outputs/weights_belize_amphibians.rds")
+    saveRDS(weights_belize_amphibians, "outputs/weights/weights_belize_amphibians.rds")
 }
 
 ## Calculate proportion of occurrences in Belize for mammals using GBIF occurrence data ------------------------
-if (file.exists("outputs/weights_belize_mammals.rds")) {
-    weights_belize_mammals <- readRDS("outputs/weights_belize_mammals.rds")
+if (file.exists("outputs/weights/weights_belize_mammals.rds")) {
+    weights_belize_mammals <- readRDS("outputs/weights/weights_belize_mammals.rds")
     message("Read existing mammals weights file (found in outputs)")
 } else {
     weights_belize_mammals <- calculate_weights_belize(belize_redlist_mammals$gbif_id, belize_redlist_mammals$species)
-    saveRDS(weights_belize_mammals, "outputs/weights_belize_mammals.rds")
+    saveRDS(weights_belize_mammals, "outputs/weights/weights_belize_mammals.rds")
 }
 
 ## Calculate proportion of occurrences in Belize for reptiles using GBIF occurrence data ------------------------
-if (file.exists("outputs/weights_belize_reptiles.rds")) {
-    weights_belize_reptiles <- readRDS("outputs/weights_belize_reptiles.rds")
+if (file.exists("outputs/weights/weights_belize_reptiles.rds")) {
+    weights_belize_reptiles <- readRDS("outputs/weights/weights_belize_reptiles.rds")
     message("Read existing reptiles weights file (found in outputs)")
 } else {
     weights_belize_reptiles <- calculate_weights_belize(belize_redlist_reptiles$gbif_id, belize_redlist_reptiles$species)
-    saveRDS(weights_belize_reptiles, "outputs/weights_belize_reptiles.rds")
+    saveRDS(weights_belize_reptiles, "outputs/weights/weights_belize_reptiles.rds")
 }
 
 ## Calculate proportion of occurrences in Belize for turtles using GBIF occurrence data ------------------------
-if (file.exists("outputs/weights_belize_turtles.rds")) {
-    weights_belize_turtles <- readRDS("outputs/weights_belize_turtles.rds")
+if (file.exists("outputs/weights/weights_belize_turtles.rds")) {
+    weights_belize_turtles <- readRDS("outputs/weights/weights_belize_turtles.rds")
     message("Read existing turtles weights file (found in outputs)")
 } else {
     weights_belize_turtles <- calculate_weights_belize(belize_redlist_turtles$gbif_id, belize_redlist_turtles$species)
-    saveRDS(weights_belize_turtles, "outputs/weights_belize_turtles.rds")
+    saveRDS(weights_belize_turtles, "outputs/weights/weights_belize_turtles.rds")
 }
 
 ## Calculate proportion of occurrences in Belize for freshwater fish using GBIF occurrence data ------------------------
 belize_redlist_fish_freshwater <- distinct(belize_redlist_fish_freshwater)
-if (file.exists("outputs/weights_belize_fish_freshwater.rds")) {
-    weights_belize_fish_freshwater <- readRDS("outputs/weights_belize_fish_freshwater.rds")
+if (file.exists("outputs/weights/weights_belize_fish_freshwater.rds")) {
+    weights_belize_fish_freshwater <- readRDS("outputs/weights/weights_belize_fish_freshwater.rds")
     message("Read existing fish_freshwater weights file (found in outputs)")
 } else {
     weights_belize_fish_freshwater <- calculate_weights_belize(belize_redlist_fish_freshwater$gbif_id, belize_redlist_fish_freshwater$species.x)
-    saveRDS(weights_belize_fish_freshwater, "outputs/weights_belize_fish_freshwater.rds")
+    saveRDS(weights_belize_fish_freshwater, "outputs/weights/weights_belize_fish_freshwater.rds")
 }
 
 ## Calculate proportion of occurrences in Belize for marine fish using GBIF occurrence data ------------------------
 belize_redlist_fish_marine <- distinct(belize_redlist_fish_marine)
-if (file.exists("outputs/weights_belize_fish_marine.rds")) {
-    weights_belize_fish_marine <- readRDS("outputs/weights_belize_fish_marine.rds")
+if (file.exists("outputs/weights/weights_belize_fish_marine.rds")) {
+    weights_belize_fish_marine <- readRDS("outputs/weights/weights_belize_fish_marine.rds")
     message("Read existing fish_marine weights file (found in outputs)")
 } else {
     weights_belize_fish_marine <- calculate_weights_belize(belize_redlist_fish_marine$gbif_id, belize_redlist_fish_marine$species.x)
-    saveRDS(weights_belize_fish_marine, "outputs/weights_belize_fish_marine.rds")
+    saveRDS(weights_belize_fish_marine, "outputs/weights/weights_belize_fish_marine.rds")
 }
 
 ## Calculate proportion of occurrences in Belize for brackish fish using GBIF occurrence data ------------------------
 belize_redlist_fish_brackish <- distinct(belize_redlist_fish_brackish)
-if (file.exists("outputs/weights_belize_fish_brackish.rds")) {
-    weights_belize_fish_brackish <- readRDS("outputs/weights_belize_fish_brackish.rds")
+if (file.exists("outputs/weights/weights_belize_fish_brackish.rds")) {
+    weights_belize_fish_brackish <- readRDS("outputs/weights/weights_belize_fish_brackish.rds")
     message("Read existing fish_brackish weights file (found in outputs)")
 } else {
     weights_belize_fish_brackish <- calculate_weights_belize(belize_redlist_fish_brackish$gbif_id, belize_redlist_fish_brackish$species.x)
-    saveRDS(weights_belize_fish_brackish, "outputs/weights_belize_fish_brackish.rds")
+    saveRDS(weights_belize_fish_brackish, "outputs/weights/weights_belize_fish_brackish.rds")
 }
 
 ## Calculate proportion of occurrences in Belize for mixed habitat fish using GBIF occurrence data ------------------------
 belize_redlist_fish_mixed <- distinct(belize_redlist_fish_mixed)
-if (file.exists("outputs/weights_belize_fish_mixed.rds")) {
-    weights_belize_fish_mixed <- readRDS("outputs/weights_belize_fish_mixed.rds")
+if (file.exists("outputs/weights/weights_belize_fish_mixed.rds")) {
+    weights_belize_fish_mixed <- readRDS("outputs/weights/weights_belize_fish_mixed.rds")
     message("Read existing fish_mixed weights file (found in outputs)")
 } else {
     weights_belize_fish_mixed <- calculate_weights_belize(belize_redlist_fish_mixed$gbif_id, belize_redlist_fish_mixed$species.x)
-    saveRDS(weights_belize_fish_mixed, "outputs/weights_belize_fish_mixed.rds")
+    saveRDS(weights_belize_fish_mixed, "outputs/weights/weights_belize_fish_mixed.rds")
 }

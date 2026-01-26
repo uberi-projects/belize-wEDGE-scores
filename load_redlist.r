@@ -12,13 +12,19 @@ if (file.exists("outputs/belize_redlist_noDD.rds")) {
     saveRDS(belize_redlist_noDD, "outputs/belize_redlist_noDD.rds")
 }
 
+## Create directory for output taxonomy batches ------------------------
+directory_batches <- "outputs/batches"
+if (!dir.exists(directory_batches)) {
+    dir.create(directory_batches, recursive = TRUE)
+}
+
 ## Add in missing clades in batches ------------------------
 batch_indices <- split(
     seq_along(belize_redlist_noDD$taxon_scientific_name),
     cut(seq_along(belize_redlist_noDD$taxon_scientific_name), 25, labels = FALSE)
 )
 for (i in seq_along(batch_indices)) {
-    batch_file <- paste0("outputs/taxonomy_batch_", i, ".rds")
+    batch_file <- paste0("outputs/batches/taxonomy_batch_", i, ".rds")
     if (file.exists(batch_file)) {
         message("Skipping batch ", i, " (found in outputs)")
     } else {
@@ -48,7 +54,7 @@ for (i in seq_along(batch_indices)) {
 }
 
 ## Combine outputs from batches ------------------------
-files <- list.files("outputs", pattern = "^taxonomy_", full.names = TRUE)
+files <- list.files("outputs/batches", pattern = "^taxonomy_", full.names = TRUE)
 belize_redlist_taxa <- lapply(files, function(f) {
     readRDS(f) %>% mutate(across(everything(), as.character))
 }) %>%
@@ -63,30 +69,29 @@ belize_redlist_reptiles <- filter(belize_redlist_taxa, class == "Squamata", !is.
 belize_redlist_turtles <- filter(belize_redlist_taxa, class == "Testudines", !is.na(gbif_id))
 belize_redlist_amphibians <- filter(belize_redlist_taxa, class == "Amphibia", !is.na(gbif_id))
 
+## Create directory for output fishbase objects ------------------------
+directory_fishbase <- "outputs/fishbase"
+if (!dir.exists(directory_fishbase)) {
+    dir.create(directory_fishbase, recursive = TRUE)
+}
+
 ## Filter to only desired taxa (fish) through FishBase species list for Belize ------------------------
-if (file.exists("outputs/fb_countries.rds")) {
-    fb_countries <- readRDS("outputs/fb_countries.rds")
+if (file.exists("outputs/fishbase/fb_countries.rds")) {
+    fb_countries <- readRDS("outputs/fishbase/fb_countries.rds")
     message("Read existing fb countries file (found in outputs)")
 } else {
-    fb_countries <- fb_tbl("countries")
-    saveRDS(fb_countries, "outputs/fb_countries.rds")
+    fb_countries <- fb_tbl("country")
+    saveRDS(fb_countries, "outputs/fishbase/fb_countries.rds")
 }
-if (file.exists("outputs/fb_species.rds")) {
-    fb_species <- readRDS("outputs/fb_species.rds")
+if (file.exists("outputs/fishbase/fb_species.rds")) {
+    fb_species <- readRDS("outputs/fishbase/fb_species.rds")
     message("Read existing fb species file (found in outputs)")
 } else {
     fb_species <- fb_tbl("species")
-    saveRDS(fb_species, "outputs/fb_species.rds")
+    saveRDS(fb_species, "outputs/fishbase/fb_species.rds")
 }
-if (file.exists("outputs/fb_families.rds")) {
-    fb_families <- readRDS("outputs/fb_families.rds")
-    message("Read existing fb families file (found in outputs)")
-} else {
-    fb_families <- fb_tbl("families")
-    saveRDS(fb_families, "outputs/fb_families.rds")
-}
-if (file.exists("outputs/fb_belize_species.rds")) {
-    fb_belize_species <- readRDS("outputs/fb_belize_species.rds")
+if (file.exists("outputs/fishbase/fb_belize_species.rds")) {
+    fb_belize_species <- readRDS("outputs/fishbase/fb_belize_species.rds")
     message("Read existing fb Belize species file (found in outputs)")
 } else {
     fb_belize_species <- fb_countries %>%
@@ -102,7 +107,7 @@ if (file.exists("outputs/fb_belize_species.rds")) {
         ) %>%
         unnest_wider(gbif_match)
     fb_belize_species <- select(fb_belize_species, speciesKey, taxon_scientific_name, species, Freshwater, Brackish, Saltwater, Habitats)
-    saveRDS(fb_belize_species, "outputs/fb_belize_species.rds")
+    saveRDS(fb_belize_species, "outputs/fishbase/fb_belize_species.rds")
 }
 belize_redlist_taxa_fishbase <- fb_belize_species %>%
     distinct(taxon_scientific_name, species, .keep_all = TRUE) %>%

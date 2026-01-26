@@ -54,10 +54,16 @@ wEDGE_fish_mixed <- weights_belize_fish_mixed %>%
     filter(!is.na(EDGE)) %>%
     mutate(wEDGE = EDGE * weight, Type = "Mixed Fish", gbif_id = as.numeric(gbif_id))
 
+## Create directory for output wEDGE scores ------------------------
+directory_wEDGE <- "outputs/wEDGE"
+if (!dir.exists(directory_wEDGE)) {
+    dir.create(directory_wEDGE, recursive = TRUE)
+}
+
 ## Compile and export results ------------------------
 wEDGE_all <- bind_rows(
     wEDGE_birds, wEDGE_amphibians, wEDGE_mammals, wEDGE_reptiles, wEDGE_turtles,
     wEDGE_fish_freshwater, wEDGE_fish_marine, wEDGE_fish_brackish, wEDGE_fish_mixed
 ) %>%
     arrange(Type, -wEDGE)
-write.csv(wEDGE_all, "outputs/wEDGE_all.csv")
+write.csv(wEDGE_all, file.path(directory_wEDGE, "wEDGE_all.csv"))
