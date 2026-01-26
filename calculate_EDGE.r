@@ -22,7 +22,7 @@ if (!dir.exists(directory_trees)) {
 }
 
 ## Define function to create phylogenetic tree for a key taxa ------------------------
-create_phylo <- function(group, redlist_species, ge_data, synonyms = synonyms_blank) {
+create_phylo <- function(group, redlist_species, ge_data, root_age_my, synonyms = synonyms_blank) {
     file_name <- paste0("outputs/trees/tree_list_", group, ".rds")
     if (file.exists(file_name)) {
         created_tree_list <- readRDS(file_name)
@@ -51,25 +51,25 @@ create_phylo <- function(group, redlist_species, ge_data, synonyms = synonyms_bl
         created_tree <- created_tree %>%
             reorder.phylo(order = "cladewise")
         created_tree <- compute.brlen(created_tree, method = "Grafen")
-        created_tree_list <- list(
-            tree = created_tree,
-            ge_data = ge_data
-        )
+        current_height <- max(node.depth.edgelength(created_tree))
+        scale_factor <- root_age_my / current_height
+        created_tree$edge.length <- created_tree$edge.length * scale_factor
+        created_tree_list <- list(tree = created_tree, ge_data = ge_data, root_age_my = root_age_my)
         saveRDS(created_tree_list, file_name)
     }
     created_tree_list
 }
 
 ## Create phylogenetic trees ------------------------
-birds_tree_list <- create_phylo("birds", belize_redlist_birds$species, GEs_birds)
-mammals_tree_list <- create_phylo("mammals", belize_redlist_mammals$species, GEs_mammals, synonyms_mammals)
-amphibians_tree_list <- create_phylo("amphibians", belize_redlist_amphibians$species, GEs_amphibians)
-reptiles_tree_list <- create_phylo("reptiles", belize_redlist_reptiles$species, GEs_reptiles)
-turtles_tree_list <- create_phylo("turtles", belize_redlist_turtles$species, GEs_turtles)
-corals_tree_list <- create_phylo("corals", belize_redlist_corals$species, GEs_corals)
-fish_freshwater_tree_list <- create_phylo("fish_freshwater", belize_redlist_fish_freshwater$species, GEs_fish_freshwater)
-fish_marine_tree_list <- create_phylo("fish_marine", belize_redlist_fish_marine$species, GEs_fish_marine)
-fish_mixed_tree_list <- create_phylo("fish_mixed", belize_redlist_fish_mixed$species, GEs_fish_mixed)
+birds_tree_list <- create_phylo("birds", belize_redlist_birds$species, GEs_birds, 110)
+mammals_tree_list <- create_phylo("mammals", belize_redlist_mammals$species, GEs_mammals, 160, synonyms_mammals)
+amphibians_tree_list <- create_phylo("amphibians", belize_redlist_amphibians$species, GEs_amphibians, 360)
+reptiles_tree_list <- create_phylo("reptiles", belize_redlist_reptiles$species, GEs_reptiles, 170)
+turtles_tree_list <- create_phylo("turtles", belize_redlist_turtles$species, GEs_turtles, 220)
+corals_tree_list <- create_phylo("corals", belize_redlist_corals$species, GEs_corals, 500)
+fish_freshwater_tree_list <- create_phylo("fish_freshwater", belize_redlist_fish_freshwater$species, GEs_fish_freshwater, 420)
+fish_marine_tree_list <- create_phylo("fish_marine", belize_redlist_fish_marine$species, GEs_fish_marine, 420)
+fish_mixed_tree_list <- create_phylo("fish_mixed", belize_redlist_fish_mixed$species, GEs_fish_mixed, 420)
 
 ## Calculate birds EDGE scores ------------------------
 EDGE_birds_calculated_list <- EDGE2_mod(tree = birds_tree_list$tree, pext = birds_tree_list$ge_data)
