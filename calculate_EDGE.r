@@ -109,3 +109,15 @@ EDGE_fish_marine_calculated <- EDGE_fish_marine_calculated_list[[1]]
 EDGE_fish_mixed_calculated_list <- EDGE2_mod(tree = fish_mixed_tree_list$tree, pext = fish_mixed_tree_list$ge_data)
 file.rename("tree.rda", file.path(directory_trees, "tree_fish_mixed.rda"))
 EDGE_fish_mixed_calculated <- EDGE_fish_mixed_calculated_list[[1]]
+
+## Compile calculated EDGE scores ------------------------
+df_EDGE_all_calculated <- EDGE_birds_calculated %>%
+    bind_rows(EDGE_mammals_calculated) %>%
+    bind_rows(EDGE_amphibians_calculated) %>%
+    bind_rows(EDGE_reptiles_calculated) %>%
+    bind_rows(EDGE_turtles_calculated) %>%
+    bind_rows(EDGE_fish_freshwater_calculated) %>%
+    bind_rows(EDGE_fish_marine_calculated) %>%
+    bind_rows(EDGE_fish_mixed_calculated) %>%
+    mutate(species = Species, Common.names = NA) %>%
+    select(species, Common.names, EDGE)
