@@ -69,6 +69,15 @@ if (file.exists("outputs/weights/weights_belize_turtles.rds")) {
     saveRDS(weights_belize_turtles, "outputs/weights/weights_belize_turtles.rds")
 }
 
+## Calculate proportion of occurrences in Belize for corals using GBIF occurrence data ------------------------
+if (file.exists("outputs/weights/weights_belize_corals.rds")) {
+    weights_belize_corals <- readRDS("outputs/weights/weights_belize_corals.rds")
+    message("Read existing corals weights file (found in outputs)")
+} else {
+    weights_belize_corals <- calculate_weights_belize(belize_redlist_corals$gbif_id, belize_redlist_corals$species)
+    saveRDS(weights_belize_corals, "outputs/weights/weights_belize_corals.rds")
+}
+
 ## Calculate proportion of occurrences in Belize for freshwater fish using GBIF occurrence data ------------------------
 belize_redlist_fish_freshwater <- distinct(belize_redlist_fish_freshwater)
 if (file.exists("outputs/weights/weights_belize_fish_freshwater.rds")) {

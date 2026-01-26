@@ -66,6 +66,7 @@ mammals_tree_list <- create_phylo("mammals", belize_redlist_mammals$species, GEs
 amphibians_tree_list <- create_phylo("amphibians", belize_redlist_amphibians$species, GEs_amphibians)
 reptiles_tree_list <- create_phylo("reptiles", belize_redlist_reptiles$species, GEs_reptiles)
 turtles_tree_list <- create_phylo("turtles", belize_redlist_turtles$species, GEs_turtles)
+corals_tree_list <- create_phylo("corals", belize_redlist_corals$species, GEs_corals)
 fish_freshwater_tree_list <- create_phylo("fish_freshwater", belize_redlist_fish_freshwater$species, GEs_fish_freshwater)
 fish_marine_tree_list <- create_phylo("fish_marine", belize_redlist_fish_marine$species, GEs_fish_marine)
 fish_mixed_tree_list <- create_phylo("fish_mixed", belize_redlist_fish_mixed$species, GEs_fish_mixed)
@@ -95,6 +96,11 @@ EDGE_turtles_calculated_list <- EDGE2_mod(tree = turtles_tree_list$tree, pext = 
 file.rename("tree.rda", file.path(directory_trees, "tree_turtles.rda"))
 EDGE_turtles_calculated <- EDGE_turtles_calculated_list[[1]]
 
+## Calculate corals EDGE scores ------------------------
+EDGE_corals_calculated_list <- EDGE2_mod(tree = corals_tree_list$tree, pext = corals_tree_list$ge_data)
+file.rename("tree.rda", file.path(directory_trees, "tree_corals.rda"))
+EDGE_corals_calculated <- EDGE_corals_calculated_list[[1]]
+
 ## Calculate fish_freshwater EDGE scores ------------------------
 EDGE_fish_freshwater_calculated_list <- EDGE2_mod(tree = fish_freshwater_tree_list$tree, pext = fish_freshwater_tree_list$ge_data)
 file.rename("tree.rda", file.path(directory_trees, "tree_fish_freshwater.rda"))
@@ -116,6 +122,7 @@ df_EDGE_all_calculated <- EDGE_birds_calculated %>%
     bind_rows(EDGE_amphibians_calculated) %>%
     bind_rows(EDGE_reptiles_calculated) %>%
     bind_rows(EDGE_turtles_calculated) %>%
+    bind_rows(EDGE_corals_calculated) %>%
     bind_rows(EDGE_fish_freshwater_calculated) %>%
     bind_rows(EDGE_fish_marine_calculated) %>%
     bind_rows(EDGE_fish_mixed_calculated) %>%

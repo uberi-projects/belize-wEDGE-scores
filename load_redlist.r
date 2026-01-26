@@ -68,6 +68,7 @@ belize_redlist_birds <- filter(belize_redlist_taxa, class == "Aves", !is.na(gbif
 belize_redlist_reptiles <- filter(belize_redlist_taxa, class == "Squamata", !is.na(gbif_id))
 belize_redlist_turtles <- filter(belize_redlist_taxa, class == "Testudines", !is.na(gbif_id))
 belize_redlist_amphibians <- filter(belize_redlist_taxa, class == "Amphibia", !is.na(gbif_id))
+belize_redlist_corals <- filter(belize_redlist_taxa, class == "Anthozoa", !is.na(gbif_id))
 
 ## Create directory for output fishbase objects ------------------------
 directory_fishbase <- "outputs/fishbase"
