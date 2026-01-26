@@ -1,5 +1,4 @@
 # calculate_wEDGE.r
-names(df_EDGE_all)
 
 ## Finalize EDGE scores to be used ------------------------
 df_EDGE_all_combined <- df_EDGE_all %>%
