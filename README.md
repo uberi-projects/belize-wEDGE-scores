@@ -5,7 +5,8 @@ This repository is intended to calculate wEDGE scores for target Belize species,
 To run this repository's project, follow these steps:
 1. Ensure you have **access to IUCN data**. Either put an API key in your .Renviron folder (IUCN_REDLIST_KEY='yourkeyhere'), or drop existing taxonomy_batch.rds files into outputs to skip using the API.
 2. **Download EDGE scores**. First, download the 2024 EDGE list from [Edge of Existence](https://www.edgeofexistence.org/download-edge-lists/), name the file EDGE_all.xlsx, and drop into the data_deposit folder of the project. Next, download the 2023 birds EDGE scores list from [Mclure et al.](https://conbio.onlinelibrary.wiley.com/doi/full/10.1111/cobi.14141) (it is found in the supplementary materials, being Appendix S2), name the file EDGE_birds.xlsx, and drop into the data_deposit folder of the project.
-3. Simply **run the R script** "run_project.r", which will result in an output file, "wEDGE_all.csv," for your use.
+3. **Download Dated Phylogenies**. Download the coral dated phylogeny from [Vaga et al.](doi.org/10.1038/s41586-025-09615-6) (look in the accompanying figshare for the tree file, with the extension .newark.rds) and add it to the data_deposit folder of the project. 
+4. Simply **run the R script** "run_project.r", which will result in an output file, "wEDGE_all.csv," for your use.
 
 As you run the script, other outputs will be created, which are stored R objects (.rds files). These are temporary checkpoints throughout the script, so that if you must rerun later you don't need to wait for the IUCN, GBIF, or FishBase APIs again. If you have existing versions of these output files from an external source already, such as a UB-ERI collaborator, feel free to add those directly into the outputs folder yourself to greatly reduce time spent in the R scripts.
 
