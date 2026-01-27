@@ -81,37 +81,25 @@ fish_tree_list <- create_phylo(
     420, "Carcharodon carcharias"
 )
 
-## Calculate birds EDGE scores ------------------------
+## Calculate EDGE scores ------------------------
 EDGE_birds_calculated_list <- EDGE2_mod(tree = drop.tip(birds_tree_list$tree, birds_tree_list$constraint), pext = birds_tree_list$ge_data)
 file.rename("tree.rda", file.path(directory_trees, "tree_birds.rda"))
 EDGE_birds_calculated <- EDGE_birds_calculated_list[[1]]
-
-## Calculate mammals EDGE scores ------------------------
 EDGE_mammals_calculated_list <- EDGE2_mod(tree = drop.tip(mammals_tree_list$tree, mammals_tree_list$constraint), pext = mammals_tree_list$ge_data)
 file.rename("tree.rda", file.path(directory_trees, "tree_mammals.rda"))
 EDGE_mammals_calculated <- EDGE_mammals_calculated_list[[1]]
-
-## Calculate amphibians EDGE scores ------------------------
 EDGE_amphibians_calculated_list <- EDGE2_mod(tree = drop.tip(amphibians_tree_list$tree, amphibians_tree_list$constraint), pext = amphibians_tree_list$ge_data)
 file.rename("tree.rda", file.path(directory_trees, "tree_amphibians.rda"))
 EDGE_amphibians_calculated <- EDGE_amphibians_calculated_list[[1]]
-
-## Calculate reptiles EDGE scores ------------------------
 EDGE_reptiles_calculated_list <- EDGE2_mod(tree = drop.tip(reptiles_tree_list$tree, reptiles_tree_list$constraint), pext = reptiles_tree_list$ge_data)
 file.rename("tree.rda", file.path(directory_trees, "tree_reptiles.rda"))
 EDGE_reptiles_calculated <- EDGE_reptiles_calculated_list[[1]]
-
-## Calculate turtles EDGE scores ------------------------
 EDGE_turtles_calculated_list <- EDGE2_mod(tree = drop.tip(turtles_tree_list$tree, turtles_tree_list$constraint), pext = turtles_tree_list$ge_data)
 file.rename("tree.rda", file.path(directory_trees, "tree_turtles.rda"))
 EDGE_turtles_calculated <- EDGE_turtles_calculated_list[[1]]
-
-## Calculate corals EDGE scores ------------------------
 EDGE_corals_calculated_list <- EDGE2_mod(tree = drop.tip(corals_tree_list$tree, corals_tree_list$constraint), pext = corals_tree_list$ge_data)
 file.rename("tree.rda", file.path(directory_trees, "tree_corals.rda"))
 EDGE_corals_calculated <- EDGE_corals_calculated_list[[1]]
-
-## Calculate fish EDGE scores ------------------------
 EDGE_fish_calculated_list <- EDGE2_mod(tree = drop.tip(fish_tree_list$tree, fish_tree_list$constraint), pext = fish_tree_list$ge_data)
 file.rename("tree.rda", file.path(directory_trees, "tree_fish.rda"))
 EDGE_fish_calculated <- EDGE_fish_calculated_list[[1]]
@@ -125,4 +113,48 @@ df_EDGE_all_calculated <- EDGE_birds_calculated %>%
     bind_rows(EDGE_corals_calculated) %>%
     bind_rows(EDGE_fish_calculated) %>%
     mutate(species = Species, Common.names = NA) %>%
-    select(species, ED, EDGE_Calc = EDGE)
+    select(species, ED_Calc = ED, EDGE_Calc = EDGE)
+
+## Load dated coral tree ------------------------
+# https://doi.org/10.1038/s41586-025-09615-6
+coral_tree_text <- readLines(
+    "data_deposit/tree_mol_clock_penalized_likelihood_method_R.newick.rtf",
+    warn = FALSE
+)
+coral_tree_text_newick <- coral_tree_text[grepl("\\(", coral_tree_text) & grepl(";", coral_tree_text)]
+coral_tree_newick <- paste(coral_tree_text_newick, collapse = "")
+writeLines(coral_tree_newick, "data_deposit/coral_tree.newick")
+coral_tree_dated <- read.tree("data_deposit/coral_tree.newick")
+coral_tree_dated <- coral_tree_dated
+coral_tree_dated$tip.label <- str_replace(coral_tree_dated$tip.label, "^([A-Za-z]+_[a-z]+).*", "\\1")
+coral_tree_dated$tip.label <- gsub("_", " ", coral_tree_dated$tip.label)
+coral_tree_dated$tip.label[which(coral_tree_dated$tip.label == "Porites cf")[2]] <- "Porites cf 2"
+
+## Add important missing coral species ------------------------
+add_missing_tree_species <- function(tree, new_species, congener) {
+    tip_idx <- which(tree$tip.label == congener)
+    edge_row <- which(tree$edge[, 2] == tip_idx)
+    orig_bl <- tree$edge.length[edge_row]
+    tree <- bind.tip(tree, tip.label = new_species, where = tip_idx, position = orig_bl / 2)
+    tree
+}
+coral_tree_dated <- add_missing_tree_species(coral_tree_dated, "Acropora cervicornis", "Acropora palmata")
+coral_tree_dated <- add_missing_tree_species(coral_tree_dated, "Agaricia tenuifolia", "Agaricia lamarcki")
+coral_tree_dated <- add_missing_tree_species(coral_tree_dated, "Agaricia agaricites", "Agaricia lamarcki")
+coral_tree_dated <- add_missing_tree_species(coral_tree_dated, "Agaricia fragilis", "Agaricia lamarcki")
+
+## Calculate derived coral EDGE scores ------------------------
+all_coral_tree_species <- coral_tree_dated$tip.label
+GEs_corals_full <- data.frame(
+    species = all_coral_tree_species,
+    GE = ifelse(all_coral_tree_species %in% belize_redlist_corals$species, GEs_corals$GE[match(all_coral_tree_species, GEs_corals$species)], 0)
+)
+GEs_corals_full <- GEs_corals_full[match(coral_tree_dated$tip.label, GEs_corals_full$species), ]
+EDGE_corals_derived_list <- EDGE2_mod(tree = coral_tree_dated, pext = GEs_corals_full)
+EDGE_corals_derived <- EDGE_corals_derived_list[[1]]
+EDGE_corals_derived <- filter(EDGE_corals_derived, EDGE > 0)
+
+## Compile derived EDGE scores ------------------------
+df_EDGE_all_derived <- EDGE_corals_derived %>%
+    mutate(species = Species) %>%
+    select(species, ED_Deriv = ED, EDGE_Deriv = EDGE)

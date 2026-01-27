@@ -3,6 +3,7 @@
 ## Finalize EDGE scores to be used ------------------------
 df_EDGE_all_combined <- df_EDGE_all %>%
     full_join(df_EDGE_all_calculated, by = "species") %>%
+    full_join(df_EDGE_all_derived, by = "species") %>%
     select(-Common.names)
 
 ## Assemble wEDGE for birds ------------------------
@@ -45,6 +46,7 @@ wEDGE_corals <- weights_belize_corals %>%
     left_join(df_EDGE_all_combined, by = "species") %>%
     mutate(wEDGE_Calc = EDGE_Calc * weight, Type = "Coral", gbif_id = as.numeric(gbif_id)) %>%
     mutate(wEDGE_Pub = EDGE_Pub * weight, Type = "Coral") %>%
+    mutate(wEDGE_Deriv = EDGE_Deriv * weight, Type = "Coral") %>%
     left_join(select(belize_redlist_corals, red_list_category_code, original_species), by = join_by(species == original_species))
 
 ## Assemble wEDGE for fish ------------------------
@@ -64,7 +66,7 @@ if (!dir.exists(directory_wEDGE)) {
 
 ## Compile and export results ------------------------
 wEDGE_all <- bind_rows(wEDGE_birds, wEDGE_amphibians, wEDGE_mammals, wEDGE_reptiles, wEDGE_turtles, wEDGE_corals, wEDGE_fish) %>%
-    select(Type, Species = species, w = weight, ED, EDGE_Calc, EDGE_Pub, wEDGE_Calc, wEDGE_Pub, Redlist = red_list_category_code) %>%
-    arrange(Type, -wEDGE_Calc, -wEDGE_Pub) %>%
-    filter(!is.na(wEDGE_Calc) | !is.na(wEDGE_Pub))
+    select(Type, Species = species, w = weight, ED_Calc, ED_Deriv, EDGE_Calc, EDGE_Pub, EDGE_Deriv, wEDGE_Calc, wEDGE_Pub, wEDGE_Deriv, Redlist = red_list_category_code) %>%
+    arrange(Type, -wEDGE_Calc, -wEDGE_Pub, -wEDGE_Deriv) %>%
+    filter(!is.na(wEDGE_Calc) | !is.na(wEDGE_Pub) | !is.na(wEDGE_Deriv))
 write.csv(wEDGE_all, file.path(directory_wEDGE, "wEDGE_all.csv"))
