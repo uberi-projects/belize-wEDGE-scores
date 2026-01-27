@@ -17,8 +17,10 @@ As you run the script, other outputs will be created, which are stored R objects
 1. "load_packages.r" attaches required packages
 2. "load_redlist.r" fetches redlist data from IUCN and creates list of Belize species to analyze (this script requires IUCN API access or existing outputs to run)
 3. "calculate_w.r" calculates weight for species (proportion of ocurrences or range in Belize)
-4. "load_EDGE.r" loads in existing EDGE scores for Belize species
-5. "calculate_wEDGE.r" assembles final wEDGE scores
+4. "calculate_GE.r" defines a function to calculate GE for species that have no EDGE score and runs it
+5. "calculate_EDGE.r" calculates EDGE values for species based on either Tree of Life phylogenies or published molecular dated phylogenies
+6. "load_EDGE.r" loads in published EDGE scores for Belize species
+7. "calculate_wEDGE.r" assembles final wEDGE scores, including those derived from published and calculated EDGE values
 
 
 ## wEDGE Resources
