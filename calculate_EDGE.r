@@ -22,14 +22,15 @@ if (!dir.exists(directory_trees)) {
 }
 
 ## Define function to create phylogenetic tree for a key taxa ------------------------
-create_phylo <- function(group, redlist_species, ge_data, root_age_my, synonyms = synonyms_blank) {
+create_phylo <- function(group, redlist_species, ge_data, root_age_my, constraint_taxon, synonyms = synonyms_blank) {
     file_name <- paste0("outputs/trees/tree_list_", group, ".rds")
     if (file.exists(file_name)) {
         created_tree_list <- readRDS(file_name)
         message(paste("Read existing", group, "tree list file (found in outputs)"))
     } else {
         redlist_species <- redlist_species[!is.na(redlist_species)]
-        matches <- tnrs_match_names(redlist_species)
+        species_for_tree <- unique(c(redlist_species, constraint_taxon))
+        matches <- tnrs_match_names(species_for_tree)
         ott_ids <- matches$ott_id[!is.na(matches$ott_id) & !matches$approximate_match]
         ott_ids <- unique(ott_ids)
         ott_ids <- ott_ids[is_in_tree(ott_ids)]
@@ -43,7 +44,13 @@ create_phylo <- function(group, redlist_species, ge_data, root_age_my, synonyms 
             created_tree$tip.label
         )
         intersecting_species <- intersect(created_tree$tip.label, ge_data$species)
-        created_tree <- keep.tip(created_tree, intersecting_species)
+        tips_to_keep <- unique(c(intersecting_species, constraint_taxon))
+        created_tree <- keep.tip(created_tree, tips_to_keep)
+        created_tree <- root(
+            created_tree,
+            outgroup = constraint_taxon,
+            resolve.root = TRUE
+        )
         ge_data <- ge_data[ge_data$species %in% intersecting_species, ]
         ge_data <- ge_data[
             match(created_tree$tip.label, ge_data$species),
@@ -54,67 +61,60 @@ create_phylo <- function(group, redlist_species, ge_data, root_age_my, synonyms 
         current_height <- max(node.depth.edgelength(created_tree))
         scale_factor <- root_age_my / current_height
         created_tree$edge.length <- created_tree$edge.length * scale_factor
-        created_tree_list <- list(tree = created_tree, ge_data = ge_data, root_age_my = root_age_my)
+        created_tree_list <- list(tree = created_tree, ge_data = ge_data, root_age_my = root_age_my, constraint = constraint_taxon)
         saveRDS(created_tree_list, file_name)
     }
     created_tree_list
 }
 
 ## Create phylogenetic trees ------------------------
-birds_tree_list <- create_phylo("birds", belize_redlist_birds$species, GEs_birds, 110)
-mammals_tree_list <- create_phylo("mammals", belize_redlist_mammals$species, GEs_mammals, 160, synonyms_mammals)
-amphibians_tree_list <- create_phylo("amphibians", belize_redlist_amphibians$species, GEs_amphibians, 360)
-reptiles_tree_list <- create_phylo("reptiles", belize_redlist_reptiles$species, GEs_reptiles, 170)
-turtles_tree_list <- create_phylo("turtles", belize_redlist_turtles$species, GEs_turtles, 220)
-corals_tree_list <- create_phylo("corals", belize_redlist_corals$species, GEs_corals, 500)
-fish_freshwater_tree_list <- create_phylo("fish_freshwater", belize_redlist_fish_freshwater$species, GEs_fish_freshwater, 420)
-fish_marine_tree_list <- create_phylo("fish_marine", belize_redlist_fish_marine$species, GEs_fish_marine, 420)
-fish_mixed_tree_list <- create_phylo("fish_mixed", belize_redlist_fish_mixed$species, GEs_fish_mixed, 420)
+birds_tree_list <- create_phylo("birds", belize_redlist_birds$species, GEs_birds, 110, "Struthio camelus")
+mammals_tree_list <- create_phylo("mammals", belize_redlist_mammals$species, GEs_mammals, 160, "Ornithorhynchus anatinus", synonyms_mammals)
+amphibians_tree_list <- create_phylo("amphibians", belize_redlist_amphibians$species, GEs_amphibians, 350, "Ambystoma mexicanum")
+reptiles_tree_list <- create_phylo("reptiles", belize_redlist_reptiles$species, GEs_reptiles, 170, "Sphenodon punctatus")
+turtles_tree_list <- create_phylo("turtles", belize_redlist_turtles$species, GEs_turtles, 220, "Chelydra serpentina")
+corals_tree_list <- create_phylo("corals", belize_redlist_corals$species, GEs_corals, 450, "Nematostella vectensis")
+fish_tree_list <- create_phylo(
+    "fish",
+    c(belize_redlist_fish_freshwater$species, belize_redlist_fish_marine$species, belize_redlist_fish_mixed$species),
+    bind_rows(GEs_fish_freshwater, GEs_fish_marine, GEs_fish_mixed),
+    420, "Carcharodon carcharias"
+)
 
 ## Calculate birds EDGE scores ------------------------
-EDGE_birds_calculated_list <- EDGE2_mod(tree = birds_tree_list$tree, pext = birds_tree_list$ge_data)
+EDGE_birds_calculated_list <- EDGE2_mod(tree = drop.tip(birds_tree_list$tree, birds_tree_list$constraint), pext = birds_tree_list$ge_data)
 file.rename("tree.rda", file.path(directory_trees, "tree_birds.rda"))
 EDGE_birds_calculated <- EDGE_birds_calculated_list[[1]]
 
 ## Calculate mammals EDGE scores ------------------------
-EDGE_mammals_calculated_list <- EDGE2_mod(tree = mammals_tree_list$tree, pext = mammals_tree_list$ge_data)
+EDGE_mammals_calculated_list <- EDGE2_mod(tree = drop.tip(mammals_tree_list$tree, mammals_tree_list$constraint), pext = mammals_tree_list$ge_data)
 file.rename("tree.rda", file.path(directory_trees, "tree_mammals.rda"))
 EDGE_mammals_calculated <- EDGE_mammals_calculated_list[[1]]
 
 ## Calculate amphibians EDGE scores ------------------------
-EDGE_amphibians_calculated_list <- EDGE2_mod(tree = amphibians_tree_list$tree, pext = amphibians_tree_list$ge_data)
+EDGE_amphibians_calculated_list <- EDGE2_mod(tree = drop.tip(amphibians_tree_list$tree, amphibians_tree_list$constraint), pext = amphibians_tree_list$ge_data)
 file.rename("tree.rda", file.path(directory_trees, "tree_amphibians.rda"))
 EDGE_amphibians_calculated <- EDGE_amphibians_calculated_list[[1]]
 
 ## Calculate reptiles EDGE scores ------------------------
-EDGE_reptiles_calculated_list <- EDGE2_mod(tree = reptiles_tree_list$tree, pext = reptiles_tree_list$ge_data)
+EDGE_reptiles_calculated_list <- EDGE2_mod(tree = drop.tip(reptiles_tree_list$tree, reptiles_tree_list$constraint), pext = reptiles_tree_list$ge_data)
 file.rename("tree.rda", file.path(directory_trees, "tree_reptiles.rda"))
 EDGE_reptiles_calculated <- EDGE_reptiles_calculated_list[[1]]
 
 ## Calculate turtles EDGE scores ------------------------
-EDGE_turtles_calculated_list <- EDGE2_mod(tree = turtles_tree_list$tree, pext = turtles_tree_list$ge_data)
+EDGE_turtles_calculated_list <- EDGE2_mod(tree = drop.tip(turtles_tree_list$tree, turtles_tree_list$constraint), pext = turtles_tree_list$ge_data)
 file.rename("tree.rda", file.path(directory_trees, "tree_turtles.rda"))
 EDGE_turtles_calculated <- EDGE_turtles_calculated_list[[1]]
 
 ## Calculate corals EDGE scores ------------------------
-EDGE_corals_calculated_list <- EDGE2_mod(tree = corals_tree_list$tree, pext = corals_tree_list$ge_data)
+EDGE_corals_calculated_list <- EDGE2_mod(tree = drop.tip(corals_tree_list$tree, corals_tree_list$constraint), pext = corals_tree_list$ge_data)
 file.rename("tree.rda", file.path(directory_trees, "tree_corals.rda"))
 EDGE_corals_calculated <- EDGE_corals_calculated_list[[1]]
 
-## Calculate fish_freshwater EDGE scores ------------------------
-EDGE_fish_freshwater_calculated_list <- EDGE2_mod(tree = fish_freshwater_tree_list$tree, pext = fish_freshwater_tree_list$ge_data)
-file.rename("tree.rda", file.path(directory_trees, "tree_fish_freshwater.rda"))
-EDGE_fish_freshwater_calculated <- EDGE_fish_freshwater_calculated_list[[1]]
-
-## Calculate fish_marine EDGE scores ------------------------
-EDGE_fish_marine_calculated_list <- EDGE2_mod(tree = fish_marine_tree_list$tree, pext = fish_marine_tree_list$ge_data)
-file.rename("tree.rda", file.path(directory_trees, "tree_fish_marine.rda"))
-EDGE_fish_marine_calculated <- EDGE_fish_marine_calculated_list[[1]]
-
-## Calculate fish_mixed EDGE scores ------------------------
-EDGE_fish_mixed_calculated_list <- EDGE2_mod(tree = fish_mixed_tree_list$tree, pext = fish_mixed_tree_list$ge_data)
-file.rename("tree.rda", file.path(directory_trees, "tree_fish_mixed.rda"))
-EDGE_fish_mixed_calculated <- EDGE_fish_mixed_calculated_list[[1]]
+## Calculate fish EDGE scores ------------------------
+EDGE_fish_calculated_list <- EDGE2_mod(tree = drop.tip(fish_tree_list$tree, fish_tree_list$constraint), pext = fish_tree_list$ge_data)
+file.rename("tree.rda", file.path(directory_trees, "tree_fish.rda"))
+EDGE_fish_calculated <- EDGE_fish_calculated_list[[1]]
 
 ## Compile calculated EDGE scores ------------------------
 df_EDGE_all_calculated <- EDGE_birds_calculated %>%
@@ -123,8 +123,6 @@ df_EDGE_all_calculated <- EDGE_birds_calculated %>%
     bind_rows(EDGE_reptiles_calculated) %>%
     bind_rows(EDGE_turtles_calculated) %>%
     bind_rows(EDGE_corals_calculated) %>%
-    bind_rows(EDGE_fish_freshwater_calculated) %>%
-    bind_rows(EDGE_fish_marine_calculated) %>%
-    bind_rows(EDGE_fish_mixed_calculated) %>%
+    bind_rows(EDGE_fish_calculated) %>%
     mutate(species = Species, Common.names = NA) %>%
-    select(species, Common.names, EDGE)
+    select(species, Common.names, ED, EDGE)
