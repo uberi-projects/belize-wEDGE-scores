@@ -125,4 +125,4 @@ df_EDGE_all_calculated <- EDGE_birds_calculated %>%
     bind_rows(EDGE_corals_calculated) %>%
     bind_rows(EDGE_fish_calculated) %>%
     mutate(species = Species, Common.names = NA) %>%
-    select(species, Common.names, ED, EDGE)
+    select(species, ED, EDGE_Calc = EDGE)
