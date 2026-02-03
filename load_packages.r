@@ -4,7 +4,7 @@
 options(repos = c(CRAN = "https://cran.rstudio.com/"))
 required_packages <- c(
     "tidyverse", "rgbif", "maps", "rredlist", "taxize", "rfishbase", "readxl",
-    "rotl", "phylobase", "data.table", "ape", "phytools"
+    "rotl", "phylobase", "data.table", "ape", "phytools", "sf"
 )
 install_if_missing <- function(package) {
     if (!requireNamespace(package, quietly = TRUE)) {
@@ -26,3 +26,4 @@ library(phylobase)
 library(data.table)
 library(ape)
 library(phytools)
+library(sf)
