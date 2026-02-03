@@ -24,7 +24,7 @@ if (!dir.exists(directory_weights)) {
     dir.create(directory_weights, recursive = TRUE)
 }
 
-## Calculate proportion of occurrences in Belize for birds using GBIF occurrence data ------------------------
+## Calculate proportion of occurrences in Belize for birds using BirdLife International range maps ------------------------
 if (file.exists("data_deposit/belize_birds/birds_belize.shp")) {
     weights_belize_birds <- st_read("data_deposit/belize_birds/birds_belize.shp")
     message("Read existing birds weights file (found in outputs)")
