@@ -25,12 +25,11 @@ if (!dir.exists(directory_weights)) {
 }
 
 ## Calculate proportion of occurrences in Belize for birds using GBIF occurrence data ------------------------
-if (file.exists("outputs/weights/weights_belize_birds.rds")) {
-    weights_belize_birds <- readRDS("outputs/weights/weights_belize_birds.rds")
+if (file.exists("data_deposit/belize_birds/birds_belize.shp")) {
+    weights_belize_birds <- st_read("data_deposit/belize_birds/birds_belize.shp")
     message("Read existing birds weights file (found in outputs)")
 } else {
-    weights_belize_birds <- calculate_weights_belize(belize_redlist_birds$gbif_id, belize_redlist_birds$species)
-    saveRDS(weights_belize_birds, "outputs/weights/weights_belize_birds.rds")
+    message("warning: file not found in specified path")
 }
 
 ## Calculate proportion of occurrences in Belize for amphibians using GBIF occurrence data ------------------------
