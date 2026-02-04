@@ -111,19 +111,19 @@ if (file.exists("outputs/weights/weights_belize_fish_mixed.rds")) {
 
 ## Load BirdLife International range maps ------------------------
 all_files <- c(
-  "birds_belize.cpg",
-  "birds_belize.dbf",
-  "birds_belize.prj", 
-  "birds_belize.sbn", 
-  "birds_belize.sbx", 
-  "birds_belize.shx", 
-  "birds_belize.shp"
+  "global_birds.cpg",
+  "global_birds.dbf",
+  "global_birds.prj", 
+  "global_birds.sbn", 
+  "global_birds.sbx", 
+  "global_birds.shx", 
+  "global_birds.shp"
 )
-files_dir <- "data_deposit/belize_birds"
+files_dir <- "data_deposit/global_bird_range_maps"
 full_path <- file.path (files_dir, all_files)
 if (all(file.exists(full_path))) {
-  belize_birds_shp <- st_read(file.path(files_dir, "birds_belize.shp"))
-  message("All shapefile components found. Read birds_belize shapefile (found in data_deposit)")
+  global_birds_shp <- st_read(file.path(files_dir, "global_birds.shp"))
+  message("All shapefile components found. Read global_birds shapefile (found in data_deposit)")
 } else {
   missing_files <- all_files[!file.exists(full_path)]
   warning(
@@ -131,6 +131,8 @@ if (all(file.exists(full_path))) {
     paste(missing_files, collapse = ",")
     )
 }
+
+global_birds_shp <- st_make_valid(global_birds_shp)
 
 #Read belize basemap ------------------------
 belize_map <- st_read("basemap/Belize_Basemap.shp") %>%
