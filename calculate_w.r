@@ -110,11 +110,26 @@ if (file.exists("outputs/weights/weights_belize_fish_mixed.rds")) {
 }
 
 ## Load BirdLife International range maps ------------------------
-if (file.exists("data_deposit/belize_birds/birds_belize.shp")) {
-  belize_birds_shp <- st_read("data_deposit/belize_birds/birds_belize.shp")
-  message("Read birds_belize shapefile (found in data_deposit)")
+all_files <- c(
+  "birds_belize.cpg",
+  "birds_belize.dbf",
+  "birds_belize.prj", 
+  "birds_belize.sbn", 
+  "birds_belize.sbx", 
+  "birds_belize.shx", 
+  "birds_belize.shp"
+)
+files_dir <- "data_deposit/belize_birds"
+full_path <- file.path (files_dir, all_files)
+if (all(file.exists(full_path))) {
+  belize_birds_shp <- st_read(file.path(files_dir, "birds_belize.shp"))
+  message("All shapefile components found. Read birds_belize shapefile (found in data_deposit)")
 } else {
-  message("warning: file not found in specified path")
+  missing_files <- all_files[!file.exists(full_path)]
+  warning(
+    "Missing shapefile components: ",
+    paste(missing_files, collapse = ",")
+    )
 }
 
 ## Calculate proportion of occurrences in Belize for birds using BirdLife International range maps ------------------------
