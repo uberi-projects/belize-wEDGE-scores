@@ -132,4 +132,10 @@ if (all(file.exists(full_path))) {
     )
 }
 
+#Read belize basemap ------------------------
+belize_map <- st_read("basemap/Belize_Basemap.shp") %>%
+  st_transform(4326) %>%
+  st_make_valid()
+
 ## Calculate proportion of occurrences in Belize for birds using BirdLife International range maps ------------------------
+
