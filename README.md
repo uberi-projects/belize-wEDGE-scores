@@ -19,11 +19,13 @@ As you run the script, other outputs will be created, which are stored R objects
 1. "config.r" sets configuration parameters for the project
 2. "load_packages.r" attaches required packages
 3. "load_redlist.r" fetches redlist data from IUCN and creates list of Belize species to analyze (this script requires IUCN API access or existing outputs to run)
-4. "calculate_w.r" calculates weight for species (proportion of ocurrences or range in Belize)
+4. "calculate_w.r" calculates weight for species (proportion of range in Belize using spatial methods for non-birds, BirdLife range maps for birds)
 5. "calculate_GE.r" defines a function to calculate GE for species that have no EDGE score and runs it
 6. "calculate_EDGE.r" calculates EDGE values for species based on either Tree of Life phylogenies or published molecular dated phylogenies
 7. "load_EDGE.r" loads in published EDGE scores for Belize species
 8. "calculate_wEDGE.r" assembles final wEDGE scores, including those derived from published and calculated EDGE values
+
+**Legacy Script**: "legacy_calculate_w.r" contains the original occurrence-count-based weight calculation method. To use the legacy method instead, replace `source("calculate_w.r")` with `source("legacy_calculate_w.r")` in run_project.r.
 
 
 ## wEDGE Resources
