@@ -3,18 +3,6 @@
 ## Source code from rgumbs/EDGE2 repository ------------------------
 source("https://raw.githubusercontent.com/rgumbs/EDGE2/main/EDGE.2.calc")
 
-## Define binomial synonyms ------------------------
-synonyms_blank <- c()
-synonyms_mammals <- c(
-    "Physeter catodon" = "Physeter macrocephalus",
-    "Tapirus bairdii" = "Tapirella bairdii",
-    "Coendou mexicanus" = "Sphiggurus mexicanus",
-    "Odocoileus pandora" = "Mazama pandora",
-    "Antrozous dubiaquercus" = "Bauerus dubiaquercus",
-    "Micronycteris nicefori" = "Trinycteris nicefori",
-    "Micronycteris brachyotis" = "Lampronycteris brachyotis"
-)
-
 ## Create directory for output trees ------------------------
 directory_trees <- "outputs/trees"
 if (!dir.exists(directory_trees)) {
@@ -67,51 +55,48 @@ create_phylo <- function(group, redlist_species, ge_data, root_age_my, constrain
     created_tree_list
 }
 
-## Create phylogenetic trees ------------------------
-birds_tree_list <- create_phylo("birds", belize_redlist_birds$species, GEs_birds, 110, "Struthio camelus")
-mammals_tree_list <- create_phylo("mammals", belize_redlist_mammals$species, GEs_mammals, 160, "Ornithorhynchus anatinus", synonyms_mammals)
-amphibians_tree_list <- create_phylo("amphibians", belize_redlist_amphibians$species, GEs_amphibians, 350, "Ambystoma mexicanum")
-reptiles_tree_list <- create_phylo("reptiles", belize_redlist_reptiles$species, GEs_reptiles, 170, "Sphenodon punctatus")
-turtles_tree_list <- create_phylo("turtles", belize_redlist_turtles$species, GEs_turtles, 220, "Chelydra serpentina")
-corals_tree_list <- create_phylo("corals", belize_redlist_corals$species, GEs_corals, 450, "Nematostella vectensis")
-fish_tree_list <- create_phylo(
-    "fish",
-    c(belize_redlist_fish_freshwater$species, belize_redlist_fish_marine$species, belize_redlist_fish_mixed$species),
-    bind_rows(GEs_fish_freshwater, GEs_fish_marine, GEs_fish_mixed),
-    420, "Carcharodon carcharias"
+## Create phylogenetic trees using config ------------------------
+phylo_inputs <- list(
+    birds = list(species = belize_redlist_birds$species, ge = GEs_birds),
+    mammals = list(species = belize_redlist_mammals$species, ge = GEs_mammals, synonyms = synonyms_mammals),
+    amphibians = list(species = belize_redlist_amphibians$species, ge = GEs_amphibians),
+    reptiles = list(species = belize_redlist_reptiles$species, ge = GEs_reptiles),
+    turtles = list(species = belize_redlist_turtles$species, ge = GEs_turtles),
+    corals = list(species = belize_redlist_corals$species, ge = GEs_corals),
+    fish = list(
+        species = c(belize_redlist_fish_freshwater$species, belize_redlist_fish_marine$species, belize_redlist_fish_mixed$species),
+        ge = bind_rows(GEs_fish_freshwater, GEs_fish_marine, GEs_fish_mixed)
+    )
 )
 
-## Calculate EDGE scores ------------------------
-EDGE_birds_calculated_list <- EDGE2_mod(tree = drop.tip(birds_tree_list$tree, birds_tree_list$constraint), pext = birds_tree_list$ge_data)
-file.rename("tree.rda", file.path(directory_trees, "tree_birds.rda"))
-EDGE_birds_calculated <- EDGE_birds_calculated_list[[1]]
-EDGE_mammals_calculated_list <- EDGE2_mod(tree = drop.tip(mammals_tree_list$tree, mammals_tree_list$constraint), pext = mammals_tree_list$ge_data)
-file.rename("tree.rda", file.path(directory_trees, "tree_mammals.rda"))
-EDGE_mammals_calculated <- EDGE_mammals_calculated_list[[1]]
-EDGE_amphibians_calculated_list <- EDGE2_mod(tree = drop.tip(amphibians_tree_list$tree, amphibians_tree_list$constraint), pext = amphibians_tree_list$ge_data)
-file.rename("tree.rda", file.path(directory_trees, "tree_amphibians.rda"))
-EDGE_amphibians_calculated <- EDGE_amphibians_calculated_list[[1]]
-EDGE_reptiles_calculated_list <- EDGE2_mod(tree = drop.tip(reptiles_tree_list$tree, reptiles_tree_list$constraint), pext = reptiles_tree_list$ge_data)
-file.rename("tree.rda", file.path(directory_trees, "tree_reptiles.rda"))
-EDGE_reptiles_calculated <- EDGE_reptiles_calculated_list[[1]]
-EDGE_turtles_calculated_list <- EDGE2_mod(tree = drop.tip(turtles_tree_list$tree, turtles_tree_list$constraint), pext = turtles_tree_list$ge_data)
-file.rename("tree.rda", file.path(directory_trees, "tree_turtles.rda"))
-EDGE_turtles_calculated <- EDGE_turtles_calculated_list[[1]]
-EDGE_corals_calculated_list <- EDGE2_mod(tree = drop.tip(corals_tree_list$tree, corals_tree_list$constraint), pext = corals_tree_list$ge_data)
-file.rename("tree.rda", file.path(directory_trees, "tree_corals.rda"))
-EDGE_corals_calculated <- EDGE_corals_calculated_list[[1]]
-EDGE_fish_calculated_list <- EDGE2_mod(tree = drop.tip(fish_tree_list$tree, fish_tree_list$constraint), pext = fish_tree_list$ge_data)
-file.rename("tree.rda", file.path(directory_trees, "tree_fish.rda"))
-EDGE_fish_calculated <- EDGE_fish_calculated_list[[1]]
+tree_lists <- list()
+for (group in names(phylo_inputs)) {
+    inp <- phylo_inputs[[group]]
+    cfg <- tree_config[[group]]
+    tree_lists[[group]] <- create_phylo(
+        group, inp$species, inp$ge,
+        cfg$root_age, cfg$constraint,
+        synonyms = inp$synonyms %||% synonyms_blank
+    )
+}
+
+## Calculate EDGE scores for each group ------------------------
+calculate_edge_for_group <- function(tree_list, group_name) {
+    edge_list <- EDGE2_mod(
+        tree = drop.tip(tree_list$tree, tree_list$constraint),
+        pext = tree_list$ge_data
+    )
+    file.rename("tree.rda", file.path(directory_trees, paste0("tree_", group_name, ".rda")))
+    edge_list[[1]]
+}
+
+EDGE_calculated <- list()
+for (group in names(tree_lists)) {
+    EDGE_calculated[[group]] <- calculate_edge_for_group(tree_lists[[group]], group)
+}
 
 ## Compile calculated EDGE scores ------------------------
-df_EDGE_all_calculated <- EDGE_birds_calculated %>%
-    bind_rows(EDGE_mammals_calculated) %>%
-    bind_rows(EDGE_amphibians_calculated) %>%
-    bind_rows(EDGE_reptiles_calculated) %>%
-    bind_rows(EDGE_turtles_calculated) %>%
-    bind_rows(EDGE_corals_calculated) %>%
-    bind_rows(EDGE_fish_calculated) %>%
+df_EDGE_all_calculated <- bind_rows(EDGE_calculated) %>%
     mutate(species = Species, Common.names = NA) %>%
     select(species, ED_Calc = ED, EDGE_Calc = EDGE)
 
@@ -130,7 +115,7 @@ coral_tree_dated$tip.label <- str_replace(coral_tree_dated$tip.label, "^([A-Za-z
 coral_tree_dated$tip.label <- gsub("_", " ", coral_tree_dated$tip.label)
 coral_tree_dated$tip.label[which(coral_tree_dated$tip.label == "Porites cf")[2]] <- "Porites cf 2"
 
-## Add important missing coral species ------------------------
+## Add important missing coral species from config ------------------------
 add_missing_tree_species <- function(tree, new_species, congener) {
     tip_idx <- which(tree$tip.label == congener)
     edge_row <- which(tree$edge[, 2] == tip_idx)
@@ -138,10 +123,9 @@ add_missing_tree_species <- function(tree, new_species, congener) {
     tree <- bind.tip(tree, tip.label = new_species, where = tip_idx, position = orig_bl / 2)
     tree
 }
-coral_tree_dated <- add_missing_tree_species(coral_tree_dated, "Acropora cervicornis", "Acropora palmata")
-coral_tree_dated <- add_missing_tree_species(coral_tree_dated, "Agaricia tenuifolia", "Agaricia lamarcki")
-coral_tree_dated <- add_missing_tree_species(coral_tree_dated, "Agaricia agaricites", "Agaricia lamarcki")
-coral_tree_dated <- add_missing_tree_species(coral_tree_dated, "Agaricia fragilis", "Agaricia lamarcki")
+for (coral in missing_corals) {
+    coral_tree_dated <- add_missing_tree_species(coral_tree_dated, coral$new, coral$congener)
+}
 
 ## Calculate derived coral EDGE scores ------------------------
 all_coral_tree_species <- coral_tree_dated$tip.label

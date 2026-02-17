@@ -18,113 +18,75 @@ calculate_weights_belize <- function(id_vector, name_vector) {
         arrange(-weight)
 }
 
+## Helper to load cached weights or calculate them ------------------------
+load_or_calculate_weights <- function(group_name, redlist_data, species_col = "species") {
+    file_path <- paste0("outputs/weights/weights_belize_", group_name, ".rds")
+    if (file.exists(file_path)) {
+        message(paste("Read existing", group_name, "weights file (found in outputs)"))
+        readRDS(file_path)
+    } else {
+        result <- calculate_weights_belize(redlist_data$gbif_id, redlist_data[[species_col]])
+        saveRDS(result, file_path)
+        result
+    }
+}
+
 ## Create directory for output weights ------------------------
 directory_weights <- "outputs/weights"
 if (!dir.exists(directory_weights)) {
     dir.create(directory_weights, recursive = TRUE)
 }
 
-## Calculate proportion of occurrences in Belize for amphibians using GBIF occurrence data ------------------------
-if (file.exists("outputs/weights/weights_belize_amphibians.rds")) {
-    weights_belize_amphibians <- readRDS("outputs/weights/weights_belize_amphibians.rds")
-    message("Read existing amphibians weights file (found in outputs)")
-} else {
-    weights_belize_amphibians <- calculate_weights_belize(belize_redlist_amphibians$gbif_id, belize_redlist_amphibians$species)
-    saveRDS(weights_belize_amphibians, "outputs/weights/weights_belize_amphibians.rds")
+## Calculate weights for non-fish taxa using GBIF occurrence data ------------------------
+non_fish_groups <- list(
+    amphibians = belize_redlist_amphibians,
+    mammals = belize_redlist_mammals,
+    reptiles = belize_redlist_reptiles,
+    turtles = belize_redlist_turtles,
+    corals = belize_redlist_corals
+)
+for (group_name in names(non_fish_groups)) {
+    assign(
+        paste0("weights_belize_", group_name),
+        load_or_calculate_weights(group_name, non_fish_groups[[group_name]]),
+        envir = .GlobalEnv
+    )
 }
 
-## Calculate proportion of occurrences in Belize for mammals using GBIF occurrence data ------------------------
-if (file.exists("outputs/weights/weights_belize_mammals.rds")) {
-    weights_belize_mammals <- readRDS("outputs/weights/weights_belize_mammals.rds")
-    message("Read existing mammals weights file (found in outputs)")
-} else {
-    weights_belize_mammals <- calculate_weights_belize(belize_redlist_mammals$gbif_id, belize_redlist_mammals$species)
-    saveRDS(weights_belize_mammals, "outputs/weights/weights_belize_mammals.rds")
-}
-
-## Calculate proportion of occurrences in Belize for reptiles using GBIF occurrence data ------------------------
-if (file.exists("outputs/weights/weights_belize_reptiles.rds")) {
-    weights_belize_reptiles <- readRDS("outputs/weights/weights_belize_reptiles.rds")
-    message("Read existing reptiles weights file (found in outputs)")
-} else {
-    weights_belize_reptiles <- calculate_weights_belize(belize_redlist_reptiles$gbif_id, belize_redlist_reptiles$species)
-    saveRDS(weights_belize_reptiles, "outputs/weights/weights_belize_reptiles.rds")
-}
-
-## Calculate proportion of occurrences in Belize for turtles using GBIF occurrence data ------------------------
-if (file.exists("outputs/weights/weights_belize_turtles.rds")) {
-    weights_belize_turtles <- readRDS("outputs/weights/weights_belize_turtles.rds")
-    message("Read existing turtles weights file (found in outputs)")
-} else {
-    weights_belize_turtles <- calculate_weights_belize(belize_redlist_turtles$gbif_id, belize_redlist_turtles$species)
-    saveRDS(weights_belize_turtles, "outputs/weights/weights_belize_turtles.rds")
-}
-
-## Calculate proportion of occurrences in Belize for corals using GBIF occurrence data ------------------------
-if (file.exists("outputs/weights/weights_belize_corals.rds")) {
-    weights_belize_corals <- readRDS("outputs/weights/weights_belize_corals.rds")
-    message("Read existing corals weights file (found in outputs)")
-} else {
-    weights_belize_corals <- calculate_weights_belize(belize_redlist_corals$gbif_id, belize_redlist_corals$species)
-    saveRDS(weights_belize_corals, "outputs/weights/weights_belize_corals.rds")
-}
-
-## Calculate proportion of occurrences in Belize for freshwater fish using GBIF occurrence data ------------------------
+## Calculate weights for fish taxa using GBIF occurrence data ------------------------
 belize_redlist_fish_freshwater <- distinct(belize_redlist_fish_freshwater)
-if (file.exists("outputs/weights/weights_belize_fish_freshwater.rds")) {
-    weights_belize_fish_freshwater <- readRDS("outputs/weights/weights_belize_fish_freshwater.rds")
-    message("Read existing fish_freshwater weights file (found in outputs)")
-} else {
-    weights_belize_fish_freshwater <- calculate_weights_belize(belize_redlist_fish_freshwater$gbif_id, belize_redlist_fish_freshwater$species.x)
-    saveRDS(weights_belize_fish_freshwater, "outputs/weights/weights_belize_fish_freshwater.rds")
-}
-
-## Calculate proportion of occurrences in Belize for marine fish using GBIF occurrence data ------------------------
 belize_redlist_fish_marine <- distinct(belize_redlist_fish_marine)
-if (file.exists("outputs/weights/weights_belize_fish_marine.rds")) {
-    weights_belize_fish_marine <- readRDS("outputs/weights/weights_belize_fish_marine.rds")
-    message("Read existing fish_marine weights file (found in outputs)")
-} else {
-    weights_belize_fish_marine <- calculate_weights_belize(belize_redlist_fish_marine$gbif_id, belize_redlist_fish_marine$species.x)
-    saveRDS(weights_belize_fish_marine, "outputs/weights/weights_belize_fish_marine.rds")
-}
-
-## Calculate proportion of occurrences in Belize for brackish fish using GBIF occurrence data ------------------------
-belize_redlist_fish_brackish <- distinct(belize_redlist_fish_brackish)
-if (file.exists("outputs/weights/weights_belize_fish_brackish.rds")) {
-    weights_belize_fish_brackish <- readRDS("outputs/weights/weights_belize_fish_brackish.rds")
-    message("Read existing fish_brackish weights file (found in outputs)")
-} else {
-    weights_belize_fish_brackish <- calculate_weights_belize(belize_redlist_fish_brackish$gbif_id, belize_redlist_fish_brackish$species.x)
-    saveRDS(weights_belize_fish_brackish, "outputs/weights/weights_belize_fish_brackish.rds")
-}
-
-## Calculate proportion of occurrences in Belize for mixed habitat fish using GBIF occurrence data ------------------------
 belize_redlist_fish_mixed <- distinct(belize_redlist_fish_mixed)
-if (file.exists("outputs/weights/weights_belize_fish_mixed.rds")) {
-    weights_belize_fish_mixed <- readRDS("outputs/weights/weights_belize_fish_mixed.rds")
-    message("Read existing fish_mixed weights file (found in outputs)")
-} else {
-    weights_belize_fish_mixed <- calculate_weights_belize(belize_redlist_fish_mixed$gbif_id, belize_redlist_fish_mixed$species.x)
-    saveRDS(weights_belize_fish_mixed, "outputs/weights/weights_belize_fish_mixed.rds")
+
+fish_groups <- list(
+    fish_freshwater = belize_redlist_fish_freshwater,
+    fish_marine = belize_redlist_fish_marine,
+    fish_mixed = belize_redlist_fish_mixed
+)
+for (group_name in names(fish_groups)) {
+    assign(
+        paste0("weights_belize_", group_name),
+        load_or_calculate_weights(group_name, fish_groups[[group_name]], species_col = "species.x"),
+        envir = .GlobalEnv
+    )
 }
 
 ## Load BirdLife International range maps ------------------------
 files_dir <- "data_deposit/species"
-full_path <- file.path (files_dir, "BOTW_2025.gpkg")
+full_path <- file.path(files_dir, "BOTW_2025.gpkg")
 
 if (file.exists(full_path)) {
-  global_birds_range <- st_read(dsn = full_path, layer = "all_species")
-  message("Geopackage found. Read all_species layer (found in data_deposit)")
+    global_birds_range <- st_read(dsn = full_path, layer = "all_species")
+    message("Geopackage found. Read all_species layer (found in data_deposit)")
 } else {
-  warning(
-    "Geopackage not found")
+    warning(
+        "Geopackage not found"
+    )
 }
 
 ## Read belize basemap ------------------------
 belize_map <- st_read("basemap/Belize_Basemap.shp") %>%
-  st_transform(4326) %>%
-  st_make_valid()
+    st_transform(4326) %>%
+    st_make_valid()
 
 ## Calculate proportion of occurrences in Belize for birds using BirdLife International range maps ------------------------
-

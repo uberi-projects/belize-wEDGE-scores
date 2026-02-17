@@ -119,5 +119,4 @@ belize_redlist_taxa_fishbase <- fb_belize_species %>%
     left_join(belize_redlist_noDD, by = "taxon_scientific_name")
 belize_redlist_fish_freshwater <- filter(belize_redlist_taxa_fishbase, Freshwater == "1" & Habitats == 1, !is.na(gbif_id))
 belize_redlist_fish_marine <- filter(belize_redlist_taxa_fishbase, Saltwater == "1" & Habitats == 1, !is.na(gbif_id))
-belize_redlist_fish_brackish <- filter(belize_redlist_taxa_fishbase, Brackish == "1" & Habitats == 1, !is.na(gbif_id))
 belize_redlist_fish_mixed <- filter(belize_redlist_taxa_fishbase, Habitats > 1, !is.na(gbif_id))
