@@ -4,6 +4,7 @@
 
 ## Source code ------------------------
 source("load_packages.r") # attach required packages
+source("config.r") # load configuration (root ages, synonyms, type labels, etc.)
 source("load_redlist.r") # fetch redlist data from IUCN and create list of Belize species to analyze along with their redlist status
 source("calculate_w.r") # calculate weight for species (proportion of occurrences or range in Belize)
 source("calculate_GE.r") # define a function to calculate GE for species that have no EDGE score and run it
