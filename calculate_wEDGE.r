@@ -24,13 +24,17 @@ assemble_wEDGE <- function(weights_data, redlist_data, type_label, join_col = "o
 
 ## Assemble wEDGE for each standard taxa group ------------------------
 wEDGE_groups <- list(
-    birds      = list(weights = weights_belize_birds,      redlist = belize_redlist_birds),
-    amphibians = list(weights = weights_belize_amphibians,  redlist = belize_redlist_amphibians),
-    mammals    = list(weights = weights_belize_mammals,     redlist = belize_redlist_mammals),
-    reptiles   = list(weights = weights_belize_reptiles,    redlist = belize_redlist_reptiles),
-    turtles    = list(weights = weights_belize_turtles,     redlist = belize_redlist_turtles),
-    corals     = list(weights = weights_belize_corals,      redlist = belize_redlist_corals)
+    amphibians = list(weights = weights_belize_amphibians, redlist = belize_redlist_amphibians),
+    mammals    = list(weights = weights_belize_mammals, redlist = belize_redlist_mammals),
+    reptiles   = list(weights = weights_belize_reptiles, redlist = belize_redlist_reptiles),
+    turtles    = list(weights = weights_belize_turtles, redlist = belize_redlist_turtles),
+    corals     = list(weights = weights_belize_corals, redlist = belize_redlist_corals)
 )
+
+# Add birds if data is available
+if (exists("weights_belize_birds") && exists("belize_redlist_birds")) {
+    wEDGE_groups[["birds"]] <- list(weights = weights_belize_birds, redlist = belize_redlist_birds)
+}
 wEDGE_results <- list()
 for (group_name in names(wEDGE_groups)) {
     grp <- wEDGE_groups[[group_name]]
