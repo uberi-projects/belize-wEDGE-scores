@@ -78,7 +78,7 @@ calculate_spatial_weights_belize <- function(id_vector, name_vector) {
                 taxonKey = id,
                 hasCoordinate = TRUE,
                 hasGeospatialIssue = FALSE,
-                limit = 300
+                limit = 2000
             ),
             silent = TRUE
         )
