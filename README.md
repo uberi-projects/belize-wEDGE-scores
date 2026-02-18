@@ -12,20 +12,24 @@ To run this repository's project, follow these steps:
 As you run the script, other outputs will be created, which are stored R objects (.rds files). These are temporary checkpoints throughout the script, so that if you must rerun later you don't need to wait for the IUCN, GBIF, or FishBase APIs again. If you have existing versions of these output files from an external source already, such as a UB-ERI collaborator, feel free to add those directly into the outputs folder yourself to greatly reduce time spent in the R scripts.
 
 
-# Helper Scripts
+## Helper Scripts
 
 "run_project.r" sources several helper scripts to calculate wEDGE scores for Belize:
 
 1. "config.r" sets configuration parameters for the project
 2. "load_packages.r" attaches required packages
 3. "load_redlist.r" fetches redlist data from IUCN and creates list of Belize species to analyze (this script requires IUCN API access or existing outputs to run)
-4. "calculate_w.r" calculates weight for species (proportion of range in Belize using spatial methods for non-birds, BirdLife range maps for birds)
+4. "calculate_w.r" calculates weight for species (proportion of global range area falling within Belize). For non-birds, this uses clustered convex hulls built from up to 2000 GBIF occurrence records per species. For birds, BirdLife range maps are used instead. **Note**: introduced and invasive populations are not excluded from weight calculations, as GBIF records are poorly tagged for establishment status. Weights for wide-ranging species with large introduced ranges (e.g. cane toad) may therefore be underestimated.
 5. "calculate_GE.r" defines a function to calculate GE for species that have no EDGE score and runs it
 6. "calculate_EDGE.r" calculates EDGE values for species based on either Tree of Life phylogenies or published molecular dated phylogenies
 7. "load_EDGE.r" loads in published EDGE scores for Belize species
 8. "calculate_wEDGE.r" assembles final wEDGE scores, including those derived from published and calculated EDGE values
 
 **Legacy Script**: "legacy_calculate_w.r" contains the original occurrence-count-based weight calculation method. To use the legacy method instead, replace `source("calculate_w.r")` with `source("legacy_calculate_w.r")` in run_project.r.
+
+
+## AI Disclaimer
+All parts of this project were conceptualized and planned by the UB-ERI team. To support implementation, Claude Code (models Sonnet 4.5, Sonnet 4.6) was used to draft code, review outputs, and check documentation as prompted by the team. The UB-ERI team retains full responsibility for this work, including any mistakes or oversights, and does not defer responsibility to the AI models. 
 
 
 ## wEDGE Resources
